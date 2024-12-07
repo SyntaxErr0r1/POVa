@@ -17,9 +17,12 @@ def copy_files(src, dst):
             shutil.copy2(src_file, dst_file)  # Use copy2 to preserve metadata
 
 train_images_dst = './datasets/merged/train/images'
-val_images_dst = './datasets/merged/val/images'
+val_kvasir_images_dst = './datasets/merged/val_kvasir/images'
+val_clinic_images_dst = './datasets/merged/val_clinic/images'
+
 train_masks_dst = './datasets/merged/train/labels'
-val_masks_dst = './datasets/merged/val/labels'
+val_kvasir_masks_dst = './datasets/merged/val_kvasir/labels'
+val_clinic_masks_dst = './datasets/merged/val_clinic/labels'
 
 # ---------- CVC-ClinicDB --------------
 print("Copying CVC-ClinicDB...")
@@ -27,8 +30,8 @@ print("Copying CVC-ClinicDB...")
 src_labels = './datasets/CVC-ClinicDB/PNG/Ground Truth'
 src_images = './datasets/CVC-ClinicDB/PNG/Original'
 
-copy_files(src_labels, train_masks_dst)
-copy_files(src_images, train_images_dst)
+copy_files(src_labels, val_clinic_masks_dst)
+copy_files(src_images, val_clinic_images_dst)
 
 # ---------- Kvassir-SEG --------------
 print("Copying Kvassir-SEG...")
@@ -52,10 +55,10 @@ for filename in train_files:
         shutil.copy2(os.path.join(masks_dir, filename), os.path.join(train_masks_dst, filename))  # Use copy2 to preserve metadata
 
 for filename in val_files:
-    if not os.path.exists(os.path.join(val_images_dst, filename)):
-        shutil.copy2(os.path.join(images_dir, filename), os.path.join(val_images_dst, filename))  # Use copy2 to preserve metadata
-    if not os.path.exists(os.path.join(val_masks_dst, filename)):
-        shutil.copy2(os.path.join(masks_dir, filename), os.path.join(val_masks_dst, filename))  # Use copy2 to preserve metadata
+    if not os.path.exists(os.path.join(val_kvasir_images_dst, filename)):
+        shutil.copy2(os.path.join(images_dir, filename), os.path.join(val_kvasir_images_dst, filename))  # Use copy2 to preserve metadata
+    if not os.path.exists(os.path.join(val_kvasir_masks_dst, filename)):
+        shutil.copy2(os.path.join(masks_dir, filename), os.path.join(val_kvasir_masks_dst, filename))  # Use copy2 to preserve metadata
         
 # ---------- PolpGen --------------
 print("Copying PolyGen...")
