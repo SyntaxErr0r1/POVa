@@ -1,27 +1,43 @@
 import os
 import shutil
+from tqdm import tqdm
 
-def copy_files(src, dst):
+def copy_files(src, dst, file_name_list=None):
     # Ensure the destination directory exists
     os.makedirs(dst, exist_ok=True)
     
-    # List files in the source directory
-    for filename in os.listdir(src):
-        if filename.split('.')[1] != 'jpg':
-            continue
-        src_file = os.path.join(src, filename)
-        dst_file = os.path.join(dst, filename)
-        
-        # Copy the file if it is a file (and not a directory)
-        if os.path.isfile(src_file) and not os.path.exists(dst_file):
-            shutil.copy2(src_file, dst_file)  # Use copy2 to preserve metadata
+    counter = 0
+    if file_name_list is not None:
+        # Copy the files in the file_name_list
+        for filename in file_name_list:
+            src_file = os.path.join(src, filename)
+            dst_file = os.path.join(dst, filename)
+            
+            # Copy the file if it is a file (and not a directory)
+            if os.path.isfile(src_file) and not os.path.exists(dst_file):
+                shutil.copy2(src_file, dst_file)  # Use copy2 to preserve metadata
+    else:
+        # List files in the source directory
+        for filename in os.listdir(src):
+            if filename.split('.')[1] != 'jpg' and filename.split('.')[1] != 'png':
+                continue
+            src_file = os.path.join(src, filename)
+            dst_file = os.path.join(dst, filename)
+            
+            # Copy the file if it is a file (and not a directory)
+            if os.path.isfile(src_file) and not os.path.exists(dst_file):
+                shutil.copy2(src_file, dst_file)  # Use copy2 to preserve metadata
+                counter += 1
+    
+    print(f"Copied {counter} files from {src} to {dst}")
 
 train_images_dst = './datasets/merged/train/images'
-val_kvasir_images_dst = './datasets/merged/val_kvasir/images'
-val_clinic_images_dst = './datasets/merged/val_clinic/images'
-
 train_masks_dst = './datasets/merged/train/labels'
+
+val_kvasir_images_dst = './datasets/merged/val_kvasir/images'
 val_kvasir_masks_dst = './datasets/merged/val_kvasir/labels'
+
+val_clinic_images_dst = './datasets/merged/val_clinic/images'
 val_clinic_masks_dst = './datasets/merged/val_clinic/labels'
 
 # ---------- CVC-ClinicDB --------------
@@ -47,19 +63,20 @@ def read_split(file_path):
 train_files = read_split('./datasets/Kvasir-SEG/train.txt')
 val_files = read_split('./datasets/Kvasir-SEG/val.txt')
 
-# Copy images
-for filename in train_files:
-    if not os.path.exists(os.path.join(train_images_dst, filename)):
-        shutil.copy2(os.path.join(images_dir, filename), os.path.join(train_images_dst, filename))
-    if not os.path.exists(os.path.join(train_masks_dst, filename)):
-        shutil.copy2(os.path.join(masks_dir, filename), os.path.join(train_masks_dst, filename))  # Use copy2 to preserve metadata
+# create directories
+os.makedirs(train_images_dst, exist_ok=True)
+os.makedirs(train_masks_dst, exist_ok=True)
+os.makedirs(val_kvasir_images_dst, exist_ok=True)
+os.makedirs(val_kvasir_masks_dst, exist_ok=True)
 
-for filename in val_files:
-    if not os.path.exists(os.path.join(val_kvasir_images_dst, filename)):
-        shutil.copy2(os.path.join(images_dir, filename), os.path.join(val_kvasir_images_dst, filename))  # Use copy2 to preserve metadata
-    if not os.path.exists(os.path.join(val_kvasir_masks_dst, filename)):
-        shutil.copy2(os.path.join(masks_dir, filename), os.path.join(val_kvasir_masks_dst, filename))  # Use copy2 to preserve metadata
-        
+# Copy images
+copy_files(images_dir, train_images_dst, train_files)
+copy_files(images_dir, val_kvasir_images_dst, val_files)
+
+# Copy masks
+copy_files(masks_dir, train_masks_dst, train_files)
+copy_files(masks_dir, val_kvasir_masks_dst, val_files)
+
 # ---------- PolpGen --------------
 print("Copying PolyGen...")
 data_path = './datasets/PolypGen2021_MultiCenterData_v3/PolypGen2021_MultiCenterData_v3'
