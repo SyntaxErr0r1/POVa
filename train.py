@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from segmentation_models_pytorch import Unet
 from segmentation_models_pytorch.utils.losses import DiceLoss
-from segmentation_models_pytorch.utils.metrics import IoU
+from segmentation_models_pytorch.utils.metrics import IoU, Fscore
 from torchvision.transforms import ToTensor, Normalize, Compose
 from torchvision.transforms import Resize
 
@@ -76,10 +76,15 @@ model = model.to(device)  # Move model to GPU
 
 loss = DiceLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-metric = IoU()
+metric_fscore = Fscore()
+metric_iou = IoU()
 
 # Directory to save the model
 os.makedirs("./models", exist_ok=True)
+
+
+print("Starting Training...")
+exit()
 
 # Training Loop
 for epoch in range(4):  # Number of epochs
@@ -103,6 +108,7 @@ for epoch in range(4):  # Number of epochs
     model.eval()
     val_loss_total = 0
     val_iou_total = 0
+    val_fscore_total = 0
     with torch.no_grad():
         for val_images, val_masks in val_loader:
             val_images, val_masks = val_images.to(device), val_masks.to(device)
@@ -113,14 +119,17 @@ for epoch in range(4):  # Number of epochs
                 val_masks = val_masks.unsqueeze(1)  # Add channel dimension
 
             val_loss = loss(val_preds, val_masks)
-            val_iou = metric(val_preds, val_masks)
+            val_iou = metric_iou(val_preds, val_masks)
+            va_fscore = metric_fscore(val_preds, val_masks)
 
             val_loss_total += val_loss.item()
             val_iou_total += val_iou.item()
+            val_fscore_total += va_fscore.item()
 
         val_loss_avg = val_loss_total / len(val_loader)
         val_iou_avg = val_iou_total / len(val_loader)
-        print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f}")
+        val_fscore_avg = val_fscore_total / len(val_loader)
+        print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fscore_avg:.4f}")
 
     # --------------------- Plot random result in between epochs --------------------------
 
@@ -159,7 +168,7 @@ for epoch in range(4):  # Number of epochs
 
 # Final Validation Performance
 print("\n\nFinal Validation Performance:")
-print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f}")
+print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fscore_avg:.4f}")
 
 # Save the trained model
 model_save_path = "./models/unet_segmentation.pth"
