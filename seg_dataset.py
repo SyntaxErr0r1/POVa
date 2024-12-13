@@ -7,7 +7,7 @@ import numpy as np
 
 # Custom Dataset
 class SegmentationDataset(torch.utils.data.Dataset):
-    def __init__(self, image_dir, mask_dir, transform=None, target_size=(256, 256)):
+    def __init__(self, image_dir, mask_dir, transform=None, target_size=(1024, 1024)):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.images = os.listdir(image_dir)

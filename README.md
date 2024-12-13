@@ -40,3 +40,7 @@ Activate python environment:
 `source env22/bin/activate`
 Install required packages:
 `pip install -r requirements.txt`
+
+## Resources
+
+We utilized and modified the code from the (finetune-anything)[https://github.com/ziqi-jin/finetune-anything] project, distributed under the MIT License, as a foundation for fine-tuning the SAM model for polyp segmentation. The original code was modified extensively to meet our specific requirements.
