@@ -1,62 +1,25 @@
 import os
 import torch
-from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader
-from torchvision import transforms
 from segmentation_models_pytorch import Unet
 from segmentation_models_pytorch.utils.losses import DiceLoss
 from segmentation_models_pytorch.utils.metrics import IoU, Fscore
 from torchvision.transforms import ToTensor, Normalize, Compose
-from torchvision.transforms import Resize
+
+from seg_dataset import SegmentationDataset
 
 # Check if GPU is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-# Custom Dataset
-class SegmentationDataset(torch.utils.data.Dataset):
-    def __init__(self, image_dir, mask_dir, transform=None, target_size=(256, 256)):
-        self.image_dir = image_dir
-        self.mask_dir = mask_dir
-        self.images = os.listdir(image_dir)
-        self.transform = transform
-        self.target_size = target_size
-
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.image_dir, self.images[idx])
-        mask_path = os.path.join(self.mask_dir, self.images[idx])
-
-        image = Image.open(img_path).convert("RGB")
-        if os.path.exists(mask_path):
-            mask = Image.open(mask_path).convert("L")
-        else:
-            mask = Image.fromarray(np.zeros((image.size[1], image.size[0]), dtype=np.uint8)).convert("L")
-
-        assert os.path.exists(mask_path), f"Mask file {mask_path} not found for {img_path}"
-
-        resize = Resize(self.target_size)
-        image = resize(image)
-        mask = resize(mask)
-
-        if self.transform:
-            image = self.transform(image)
-
-        mask = torch.tensor(np.asarray(mask) / 255.0, dtype=torch.float32).unsqueeze(0)  # Add channel dimension
-        assert mask.min() >= 0 and mask.max() <= 1, "Masks must be normalized to [0, 1]"
-
-        return image, mask
-
-    def __len__(self):
-        return len(self.images)
-
 # Dataset Paths
 train_images = "./datasets/merged/train/images"
 train_masks = "./datasets/merged/train/labels"
-val_images = "./datasets/merged/val/images"
-val_masks = "./datasets/merged/val/labels"
+val_images = "./datasets/merged/val_clinic/images"
+val_masks = "./datasets/merged/val_clinic/labels"
 
 # Transformations
 transform = Compose([
