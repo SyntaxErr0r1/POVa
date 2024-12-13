@@ -1,0 +1,6 @@
+torch
+Pillow
+numpy
+matplotlib
+torchvision
+segmentation_models_pytorch
