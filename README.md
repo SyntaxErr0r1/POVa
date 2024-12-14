@@ -31,6 +31,11 @@ For merging:
 | PolypGen2021_MultiCenterData_v3 | 8037         | -                 | -           |
 
 ## Deployment
+## Evaluation
+1. Run `python eval.py` with arguments
+    -model path_to_saved_model (only UNet supported right now)
+    -data path_to_evaluation_dataset (must contain `images` and `labels` directories)
+
 
 ### Prepare python environment
 
