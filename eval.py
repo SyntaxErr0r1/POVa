@@ -72,7 +72,6 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate a binary segmentation model.")
     parser.add_argument("-model", required=True, help="Filepath to the segmentation model.")
     parser.add_argument("-data", required=True, help="Filepath to the evaluation dataset (images and labels directories).")
-    parser.add_argument("-metric", default="IoU", help="Evaluation metric to be used (default: IoU).")
 
     args = parser.parse_args()
 
@@ -93,13 +92,6 @@ def main():
     # Load model
     model = load_model(args.model)
 
-    # # Set evaluation metric
-    # if args.metric.lower() == "iou":
-    #     metric = IoU(threshold=0.5)
-    # else:
-    #     raise ValueError("Unsupported evaluation metric. Currently only 'IoU' is supported.")
-
-    # Evaluate model
     score = evaluate_model(model, dataloader)
 
     print("Evaluation Scores:")
