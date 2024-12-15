@@ -2,3 +2,4 @@
 !/datasets/
 .history/*
 /env22/*
+__pycache__/*

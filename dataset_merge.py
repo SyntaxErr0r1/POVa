@@ -31,6 +31,20 @@ def copy_files(src, dst, file_name_list=None):
     
     print(f"Copied {counter} files from {src} to {dst}")
 
+def remove_mask_suffix(directory):
+    """removes filename suffix _mask from the name.
+    fix for cases where images/01.jpg has label named labels/01_mask.png"""
+
+    print(f"Removing '_mask' suffix from files in {directory} ...")
+    for filename in os.listdir(directory):
+        if filename.split('.')[1] != 'png' and filename.split('.')[1] != 'jpg':
+            continue
+        src_file = os.path.join(directory, filename)
+        dst_file = os.path.join(directory, filename.replace('_mask', ''))
+        os.rename(src_file, dst_file)
+    
+    print(f"Files renamed")
+
 train_images_dst = './datasets/merged/train/images'
 train_masks_dst = './datasets/merged/train/labels'
 
@@ -52,8 +66,8 @@ copy_files(src_images, val_clinic_images_dst)
 # ---------- Kvassir-SEG --------------
 print("Copying Kvassir-SEG...")
 
-images_dir = './datasets/Kvasir-SEG/Kvasir-SEG/Kvasir-SEG/images'
-masks_dir = './datasets/Kvasir-SEG/Kvasir-SEG/Kvasir-SEG/masks'
+kvasir_images_dir = './datasets/Kvasir-SEG/Kvasir-SEG/Kvasir-SEG/images'
+kvasir_masks_dir = './datasets/Kvasir-SEG/Kvasir-SEG/Kvasir-SEG/masks'
 
 # Read file splits
 def read_split(file_path):
@@ -70,15 +84,15 @@ os.makedirs(val_kvasir_images_dst, exist_ok=True)
 os.makedirs(val_kvasir_masks_dst, exist_ok=True)
 
 # Copy images
-copy_files(images_dir, train_images_dst, train_files)
-copy_files(images_dir, val_kvasir_images_dst, val_files)
+copy_files(kvasir_images_dir, train_images_dst, train_files)
+copy_files(kvasir_images_dir, val_kvasir_images_dst, val_files)
 
 # Copy masks
-copy_files(masks_dir, train_masks_dst, train_files)
-copy_files(masks_dir, val_kvasir_masks_dst, val_files)
+copy_files(kvasir_masks_dir, train_masks_dst, train_files)
+copy_files(kvasir_masks_dir, val_kvasir_masks_dst, val_files)
 
-# ---------- PolpGen --------------
-print("Copying PolyGen...")
+# ---------- PolypGen --------------
+print("Copying PolypGen...")
 data_path = './datasets/PolypGen2021_MultiCenterData_v3/PolypGen2021_MultiCenterData_v3'
 
     # ------------- data_C1 - data_C6 ------------- 
@@ -86,6 +100,7 @@ for dir in os.listdir(data_path):
     if dir.split('_')[0] == 'data':
         copy_files(os.path.join(data_path, dir, 'images_' + dir.split('_')[1]), train_images_dst)
         copy_files(os.path.join(data_path, dir, 'masks_' + dir.split('_')[1]), train_masks_dst)
+
 
     # ------------- Sequence negative ------------- 
 data_path_neg = os.path.join(data_path, 'sequenceData/negativeOnly')
@@ -105,4 +120,5 @@ for dir in os.listdir(data_path_pos):
     copy_files(os.path.join(dirpath, 'images_' + dir), train_images_dst)
     copy_files(os.path.join(dirpath, 'masks_' + dir), train_masks_dst)
 
+remove_mask_suffix(os.path.join(train_masks_dst))
 print("Done")

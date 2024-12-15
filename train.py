@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from segmentation_models_pytorch import Unet
 from segmentation_models_pytorch.utils.losses import DiceLoss
-from segmentation_models_pytorch.utils.metrics import IoU
+from segmentation_models_pytorch.utils.metrics import IoU, Fscore
 from torchvision.transforms import ToTensor, Normalize, Compose
+from tqdm import tqdm
 
 from seg_dataset import SegmentationDataset
 
@@ -16,10 +17,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # Dataset Paths
-train_images = "./datasets/merged/train/images"
-train_masks = "./datasets/merged/train/labels"
-val_images = "./datasets/merged/val_clinic/images"
-val_masks = "./datasets/merged/val_clinic/labels"
+root_dir = "/content/drive/MyDrive/POVa/"   # for easier training on Google Colab
+train_images = os.path.join(root_dir,"merged/train/images")
+train_masks = os.path.join(root_dir,"merged/train/labels")
+val_images = os.path.join(root_dir,"merged/val/images")
+val_masks = os.path.join(root_dir,"merged/val/labels")
 
 # Transformations
 transform = Compose([
@@ -39,17 +41,21 @@ model = model.to(device)  # Move model to GPU
 
 loss = DiceLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-metric = IoU()
+metric_fscore = Fscore()
+metric_iou = IoU()
 
 # Directory to save the model
 os.makedirs("./models", exist_ok=True)
+
+
+print("Starting Training...")
 
 # Training Loop
 for epoch in range(4):  # Number of epochs
     print(f"Epoch {epoch + 1}")
     model.train()
     train_loss_total = 0
-    for images, masks in train_loader:
+    for images, masks in tqdm(train_loader):
         images, masks = images.to(device), masks.to(device)  # Move data to GPU
         preds = model(images)
         preds = torch.sigmoid(preds)  # Sigmoid for binary segmentation
@@ -66,6 +72,7 @@ for epoch in range(4):  # Number of epochs
     model.eval()
     val_loss_total = 0
     val_iou_total = 0
+    val_fscore_total = 0
     with torch.no_grad():
         for val_images, val_masks in val_loader:
             val_images, val_masks = val_images.to(device), val_masks.to(device)
@@ -76,14 +83,17 @@ for epoch in range(4):  # Number of epochs
                 val_masks = val_masks.unsqueeze(1)  # Add channel dimension
 
             val_loss = loss(val_preds, val_masks)
-            val_iou = metric(val_preds, val_masks)
+            val_iou = metric_iou(val_preds, val_masks)
+            va_fscore = metric_fscore(val_preds, val_masks)
 
             val_loss_total += val_loss.item()
             val_iou_total += val_iou.item()
+            val_fscore_total += va_fscore.item()
 
         val_loss_avg = val_loss_total / len(val_loader)
         val_iou_avg = val_iou_total / len(val_loader)
-        print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f}")
+        val_fscore_avg = val_fscore_total / len(val_loader)
+        print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fscore_avg:.4f}")
 
     # --------------------- Plot random result in between epochs --------------------------
 
@@ -122,9 +132,22 @@ for epoch in range(4):  # Number of epochs
 
 # Final Validation Performance
 print("\n\nFinal Validation Performance:")
-print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f}")
+print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fscore_avg:.4f}")
+
+
 
 # Save the trained model
-model_save_path = "./models/unet_segmentation.pth"
+model_save_path = os.path.join(root_dir,"models/unet_segmentation.pth")
 torch.save(model.state_dict(), model_save_path)
 print(f"Model saved to {model_save_path}")
+
+# # push to Hugging Face 
+# # check if HuggingFace "HF_TOKEN" environment variable is set
+# if "HF_TOKEN" in os.environ:
+#     from huggingface_hub import login
+#     hf_token = os.environ["HF_TOKEN"]
+#     # Login to the Hugging Face model hub
+#     login(token=hf_token)
+
+#     # Push the model to the Hugging Face model hub
+#     model.save_pretrained(model_save_path, model_card_kwargs={"dataset": "POVa Dataset"}, push_to_hub=True)
