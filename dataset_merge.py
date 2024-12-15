@@ -120,6 +120,5 @@ for dir in os.listdir(data_path_pos):
     copy_files(os.path.join(dirpath, 'images_' + dir), train_images_dst)
     copy_files(os.path.join(dirpath, 'masks_' + dir), train_masks_dst)
 
-
 remove_mask_suffix(os.path.join(train_masks_dst))
 print("Done")

@@ -8,6 +8,7 @@ from segmentation_models_pytorch import Unet
 from segmentation_models_pytorch.utils.losses import DiceLoss
 from segmentation_models_pytorch.utils.metrics import IoU, Fscore
 from torchvision.transforms import ToTensor, Normalize, Compose
+from tqdm import tqdm
 
 from seg_dataset import SegmentationDataset
 
@@ -16,10 +17,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # Dataset Paths
-train_images = "./datasets/merged/train/images"
-train_masks = "./datasets/merged/train/labels"
-val_images = "./datasets/merged/val_clinic/images"
-val_masks = "./datasets/merged/val_clinic/labels"
+root_dir = "/content/drive/MyDrive/POVa/"   # for easier training on Google Colab
+train_images = os.path.join(root_dir,"merged/train/images")
+train_masks = os.path.join(root_dir,"merged/train/labels")
+val_images = os.path.join(root_dir,"merged/val/images")
+val_masks = os.path.join(root_dir,"merged/val/labels")
 
 # Transformations
 transform = Compose([
@@ -47,14 +49,13 @@ os.makedirs("./models", exist_ok=True)
 
 
 print("Starting Training...")
-exit()
 
 # Training Loop
 for epoch in range(4):  # Number of epochs
     print(f"Epoch {epoch + 1}")
     model.train()
     train_loss_total = 0
-    for images, masks in train_loader:
+    for images, masks in tqdm(train_loader):
         images, masks = images.to(device), masks.to(device)  # Move data to GPU
         preds = model(images)
         preds = torch.sigmoid(preds)  # Sigmoid for binary segmentation
@@ -133,7 +134,20 @@ for epoch in range(4):  # Number of epochs
 print("\n\nFinal Validation Performance:")
 print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fscore_avg:.4f}")
 
+
+
 # Save the trained model
-model_save_path = "./models/unet_segmentation.pth"
+model_save_path = os.path.join(root_dir,"models/unet_segmentation.pth")
 torch.save(model.state_dict(), model_save_path)
 print(f"Model saved to {model_save_path}")
+
+# # push to Hugging Face 
+# # check if HuggingFace "HF_TOKEN" environment variable is set
+# if "HF_TOKEN" in os.environ:
+#     from huggingface_hub import login
+#     hf_token = os.environ["HF_TOKEN"]
+#     # Login to the Hugging Face model hub
+#     login(token=hf_token)
+
+#     # Push the model to the Hugging Face model hub
+#     model.save_pretrained(model_save_path, model_card_kwargs={"dataset": "POVa Dataset"}, push_to_hub=True)
