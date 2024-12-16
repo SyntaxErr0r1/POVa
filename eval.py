@@ -80,6 +80,8 @@ def main():
     label_dir = os.path.join(args.data, "labels")
     if not os.path.isdir(image_dir) or not os.path.isdir(label_dir):
         raise ValueError("Evaluation dataset must contain 'images' and 'labels' directories.")
+    
+    print("Evaluating model", args.model ,"on dataset", args.data)
 
     transform = Compose([
         ToTensor(),

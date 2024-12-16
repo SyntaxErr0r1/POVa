@@ -3,3 +3,4 @@
 .history/*
 /env22/*
 __pycache__/*
+models/*
