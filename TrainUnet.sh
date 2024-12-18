@@ -5,8 +5,6 @@
 #PBS -l select=1:ncpus=2:mem=64gb:scratch_local=200gb:ngpus=1
 #PBS -l walltime=6:00:00
 #PBS -j oe
-#PBS -o $PBS_O_WORKDIR/logs/output.log
-#PBS -e $PBS_O_WORKDIR/logs/error.log
 
 # Load necessary modules (adjust according to your cluster environment)
 module load singularity
@@ -23,6 +21,10 @@ singularity shell --nv /cvmfs/singularity.metacentrum.cz/NGC/PyTorch:24.10-py3.S
 
 # Install segmentation_models.pytorch
 pip install -U git+https://github.com/qubvel-org/segmentation_models.pytorch
+
+pip3 install -r requirements.txt
+
+mkdir -p $PBS_O_WORKDIR/logs/$PBS_JOBID
 
 # Run the Python training script
 if command -v python3 &> /dev/null; then

@@ -51,7 +51,7 @@ os.makedirs("./models", exist_ok=True)
 print("Starting Training...")
 
 # Training Loop
-for epoch in range(4):  # Number of epochs
+for epoch in range(6):  # Number of epochs
     print(f"Epoch {epoch + 1}")
     model.train()
     train_loss_total = 0
@@ -137,7 +137,7 @@ print(f"Validation Loss: {val_loss_avg:.4f}, IoU: {val_iou_avg:.4f} F1: {val_fsc
 
 
 # Save the trained model
-model_save_path = os.path.join(root_dir,"models/unet_segmentation.pth")
+model_save_path = os.path.join(root_dir,"models/unet_segmentation_6ep.pth")
 torch.save(model.state_dict(), model_save_path)
 print(f"Model saved to {model_save_path}")
 
