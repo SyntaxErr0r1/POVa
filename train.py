@@ -38,7 +38,7 @@ def get_dataloader(dataset_path, batch_size=8, shuffle=True):
 
 # Datasets
 #todo: proper train path
-train_path = "datasets/merged/val_kvasir"
+train_path = "datasets/merged/train"
 train_loader = get_dataloader(train_path, batch_size=8, shuffle=True)
 val_loader = get_dataloader("datasets/merged/val", batch_size=8, shuffle=False)
 val_kvasir_loader = get_dataloader("datasets/merged/val_kvasir", batch_size=8, shuffle=False)
