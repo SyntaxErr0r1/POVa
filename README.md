@@ -20,6 +20,11 @@ For merging:
 3. Unzip datasets into this folder
 4. Run `python ./datasets/dataset_merge.py`
 
+## Augmentation
+1. Run `python augment.py` with arguments
+    -data path_to_dataset (must contain `images` and `labels` directories)
+
+
 ## Datasets used
 
 <!-- table -->
