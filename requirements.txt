@@ -4,3 +4,4 @@ numpy
 matplotlib
 torchvision
 segmentation_models_pytorch
+scikit-image 
