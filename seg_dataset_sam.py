@@ -37,7 +37,7 @@ class SegmentationDataset(torch.utils.data.Dataset):
         else:
             mask = Image.fromarray(np.zeros((image.size[1], image.size[0]), dtype=np.uint8)).convert("L")
 
-        assert os.path.exists(mask_path), f"Mask file {mask_path} not found for {img_path}"
+        #assert os.path.exists(mask_path), f"Mask file {mask_path} not found for {img_path}"
 
         resize = Resize(self.target_size)
         image = resize(image)

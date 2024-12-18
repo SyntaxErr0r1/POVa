@@ -39,7 +39,8 @@ logging.getLogger("rich")
 # @param epoch: Epoch number
 def save_checkpoint(model, optimizer, epoch):
     cptPath = Path(args.cfg)
-    cptName = "SAM_"+cptPath.stem+".pth"
+    cptName = "SAM_"+cptPath.stem+"_e"+str(epoch)+".pth"
+    logging.info("Saving checkpoint: {cptName}")
     
     cptDir = Path("models")
     cptDir.mkdir(parents=True, exist_ok=True)
@@ -179,40 +180,40 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     train_loss_epoch = []
     loss_batch = 0
     
-    with tqdm(train_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as train_bar:
-        for images, masks, points, labels in train_bar:
-            images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
-            #print(f"images:{images.shape}\nmasks:{masks.shape}\nbox:{box.shape}")
-            with torch.no_grad():
-                image_embedding = sam_model.image_encoder(images)
-            
-            with torch.no_grad():
-                sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
-                    points=(points, labels),
-                    #labels=labels,
-                    boxes=None,
-                    masks=None,
-                )
-            
-            low_res_masks, iou_predictions = sam_model.mask_decoder(
-                image_embeddings=image_embedding,
-                image_pe=sam_model.prompt_encoder.get_dense_pe(),
-                sparse_prompt_embeddings=sparse_embeddings,
-                dense_prompt_embeddings=dense_embeddings,
-                multimask_output=False,
-                )
-            
-            upscaled_masks = sam_model.postprocess_masks(low_res_masks, target_size, target_size).to(device)
-            preds = torch.sigmoid(upscaled_masks).to(device)
-            
-            loss_value = loss(preds, masks)
-            optimizer.zero_grad()
-            loss_value.backward()
-            optimizer.step()
-            train_loss_epoch.append(loss_value.item())
-            
-            loss_batch = loss_value.item()
-            train_bar.set_postfix(loss=f"{loss_batch:.4f}")
+    #with tqdm(train_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as train_bar:
+    for images, masks, points, labels in train_loader:
+        images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
+        #print(f"images:{images.shape}\nmasks:{masks.shape}\nbox:{box.shape}")
+        with torch.no_grad():
+            image_embedding = sam_model.image_encoder(images)
+        
+        with torch.no_grad():
+            sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
+                points=(points, labels),
+                #labels=labels,
+                boxes=None,
+                masks=None,
+            )
+        
+        low_res_masks, iou_predictions = sam_model.mask_decoder(
+            image_embeddings=image_embedding,
+            image_pe=sam_model.prompt_encoder.get_dense_pe(),
+            sparse_prompt_embeddings=sparse_embeddings,
+            dense_prompt_embeddings=dense_embeddings,
+            multimask_output=False,
+            )
+        
+        upscaled_masks = sam_model.postprocess_masks(low_res_masks, target_size, target_size).to(device)
+        preds = torch.sigmoid(upscaled_masks).to(device)
+        
+        loss_value = loss(preds, masks)
+        optimizer.zero_grad()
+        loss_value.backward()
+        optimizer.step()
+        train_loss_epoch.append(loss_value.item())
+        
+        loss_batch = loss_value.item()
+            #train_bar.set_postfix(loss=f"{loss_batch:.4f}")
 
     train_loss_avg = mean(train_loss_epoch)
     
@@ -221,8 +222,8 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     val_loss_epoch = []
     val_iou_epoch = []
     with torch.no_grad():
-        with tqdm(val_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as val_bar:
-            for images, masks, points, labels in val_bar:
+        #with tqdm(val_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as val_bar:
+            for images, masks, points, labels in val_loader:
                 images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
                 image_embedding = sam_model.image_encoder(images)
                 sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
@@ -251,6 +252,9 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     plot_results(sam_model, val_loader, epoch)
     logging.info(f"\tEpoch [{epoch+1}/{cfg['TRAIN']['EPOCHS']}] Train Loss: {train_loss_avg:.4f} | Val loss: {val_loss_avg:.4f} | IoU: {val_iou_avg:.4f}")
    
+   
+    if (epoch+1) % 5 == 0:
+        save_checkpoint(sam_model, optimizer, epoch+1)
 
 # Save model checkpoint
 save_checkpoint(sam_model, optimizer, cfg['TRAIN']['EPOCHS'])
