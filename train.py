@@ -17,11 +17,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # Dataset Paths
-root_dir = "/content/drive/MyDrive/POVa/"   # for easier training on Google Colab
-train_images = os.path.join(root_dir,"merged/train/images")
-train_masks = os.path.join(root_dir,"merged/train/labels")
-val_images = os.path.join(root_dir,"merged/val/images")
-val_masks = os.path.join(root_dir,"merged/val/labels")
+root_dir = "./"   # for easier training on Google Colab
+train_images = os.path.join(root_dir,"datasets/merged/train/images")
+train_masks = os.path.join(root_dir,"datasets/merged/train/labels")
+val_images = os.path.join(root_dir,"datasets/merged/val/images")
+val_masks = os.path.join(root_dir,"datasets/merged/val/labels")
 
 # Transformations
 transform = Compose([
