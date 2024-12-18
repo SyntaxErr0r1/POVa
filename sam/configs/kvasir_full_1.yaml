@@ -14,8 +14,8 @@ SAM:
 
 TRAIN:
   BATCH_SIZE: 8
-  EPOCHS: 10
-  LEARNING_RATE: 0.0001
+  EPOCHS: 20
+  LEARNING_RATE: 0.00001
   WEIGHT_DECAY: 0.001
   IMAGE_SIZE: 1024
   NUM_WORKERS: 0 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers

@@ -6,7 +6,7 @@ DATASET:
 
 SAM:
   CHECKPOINT: "./sam/checkpoints/sam_vit_b_01ec64.pth"
-  CHECKPOINT_TYPE: "vit_b" # vit_b, vit_l, vit_h
+  CHECKPOINT_TYPE: "vit_b" # [vit_b, vit_l, vit_h] Adjust checkpoint path above
   FINETUNE:
     IMAGE_ENCODER: False
     PROMPT_ENCODER: False
@@ -14,7 +14,8 @@ SAM:
 
 TRAIN:
   BATCH_SIZE: 8
-  EPOCHS: 10
-  LEARNING_RATE: 0.001
+  EPOCHS: 20
+  LEARNING_RATE: 0.00001
+  WEIGHT_DECAY: 0.001
   IMAGE_SIZE: 1024
-  NUM_WORKERS: 4
+  NUM_WORKERS: 4 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers
