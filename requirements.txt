@@ -4,3 +4,7 @@ numpy
 matplotlib
 torchvision
 segmentation_models_pytorch
+rich
+pathlib
+tqdm
+opencv-python
