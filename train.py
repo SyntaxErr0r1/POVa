@@ -109,9 +109,28 @@ def evaluate(val_loader, validation_set_name=""):
     return val_loss_avg, val_iou_avg, val_fscore_avg
 
 
+def save_model(model, model_params):
+    model_save_name = f"unet_segmentation_{strftime('%m-%d_%H-%M', gmtime())}"
+    # Save the trained model
+    model_save_path = os.path.join(f"models/{model_save_name}.pth")
+    torch.save(model.state_dict(), model_save_path)
+
+    # Save the training parameters to a JSON file
+
+    metadata_save_path = os.path.join(f"models/{model_save_name}.json")
+    with open(metadata_save_path, "w") as f:
+        json.dump(model_params, f, indent=4)
+
+    print(f"Model saved to {model_save_path}")
+
+    # # push
+
 print("Starting Training...")
 
 writer = SummaryWriter()
+
+previous_f1_kvasir = 0
+previous_f1_clinic = 0
 
 # Training Loop
 for epoch in range(model_params["epochs"]):  # Number of epochs
@@ -186,6 +205,23 @@ for epoch in range(model_params["epochs"]):  # Number of epochs
     # Close the figure to release memory
     plt.close(fig)
 
+    if previous_f1_kvasir * previous_f1_clinic < val_fscore_kvasir * val_fscore_clinic:
+
+        model_params["validation_loss_kvasir"] = val_loss_kvasir
+        model_params["validation_iou_kvasir"] = val_iou_kvasir
+        model_params["validation_fscore_kvasir"] = val_fscore_kvasir
+
+        model_params["validation_loss_clinic"] = val_loss_clinic
+        model_params["validation_iou_clinic"] = val_iou_clinic
+        model_params["validation_fscore_clinic"] = val_fscore_clinic
+
+        model_params["actual_epoch"] = epoch + 1
+
+        save_model(model, model_params)
+
+    previous_f1_kvasir = val_fscore_kvasir
+    previous_f1_clinic = val_fscore_clinic
+
     # ----------------------------------------------------------------------------------------
 
 
@@ -193,27 +229,6 @@ for epoch in range(model_params["epochs"]):  # Number of epochs
 print("\n\nFinal Validation Performance:")
 print(f"Validation Loss (Kvasir): {val_loss_kvasir:.4f}, IoU: {val_iou_kvasir:.4f} F1: {val_fscore_kvasir:.4f}")
 print(f"Validation Loss (Clinic): {val_loss_clinic:.4f}, IoU: {val_iou_clinic:.4f} F1: {val_fscore_clinic:.4f}")
-
-
-model_save_name = f"unet_segmentation_{strftime('%m-%d_%H-%M', gmtime())}"
-# Save the trained model
-model_save_path = os.path.join(f"models/{model_save_name}.pth")
-torch.save(model.state_dict(), model_save_path)
-
-# Save the training parameters to a JSON file
-model_params["validation_loss_kvasir"] = val_loss_kvasir
-model_params["validation_iou_kvasir"] = val_iou_kvasir
-model_params["validation_fscore_kvasir"] = val_fscore_kvasir
-
-model_params["validation_loss_clinic"] = val_loss_clinic
-model_params["validation_iou_clinic"] = val_iou_clinic
-model_params["validation_fscore_clinic"] = val_fscore_clinic
-
-metadata_save_path = os.path.join(f"models/{model_save_name}.json")
-with open(metadata_save_path, "w") as f:
-    json.dump(model_params, f, indent=4)
-
-print(f"Model saved to {model_save_path}")
 
 writer.close()
 
