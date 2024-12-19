@@ -4,6 +4,7 @@ import argparse
 from seg_dataset import SegmentationDataset
 from torchvision.transforms import ToTensor, Normalize, Compose
 from segmentation_models_pytorch.utils.metrics import IoU, Fscore, Accuracy, Precision, Recall
+from tqdm import tqdm
 
 
 def load_model(model_path):
@@ -38,7 +39,7 @@ def evaluate_model(model, dataloader):
     iou_metric = IoU()
 
     with torch.no_grad():
-        for images, labels in dataloader:
+        for images, labels in tqdm(dataloader):
             images = images.to(device)
             labels = labels.to(device)
 

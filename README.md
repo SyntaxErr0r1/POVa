@@ -50,3 +50,13 @@ Activate python environment:
 `source env22/bin/activate`
 Install required packages:
 `pip install -r requirements.txt`
+
+
+### Evaluation
+
+| Model | Train Dataset | Test Dataset | F1 | IoU | Description |
+| --- | --- | --- | --- | --- | --- |
+| UNet | Standard | Kvasir-SEG | 0.8252 | 0.7461 | 4 epochs |
+| UNet | Standard | CVC-ClinicDB | 0.7611 | 0.6822 | 4 epochs |
+| UNet | Standard | Kvasir-SEG | 0.8264 | 0.7477 | 10 epochs |
+| UNet | Standard | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs |
