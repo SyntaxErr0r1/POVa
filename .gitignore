@@ -5,3 +5,5 @@
 __pycache__/*
 models/*
 runs/*
+outputs/*
+sam/checkpoints/*
