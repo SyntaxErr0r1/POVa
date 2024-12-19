@@ -25,7 +25,7 @@ from seg_dataset_sam import SegmentationDataset
 ##
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(message)s',
     datefmt="%H:%M:%S",
     handlers=[RichHandler()]
@@ -129,7 +129,12 @@ if cfg['SAM']['ORIG']:
     
 # Set up model part for finetuning
 if cfg['SAM']['FINETUNE']['MASK_DECODER']:
+    logging.debug(f"Setting mask decoder as finetuning model part...")
     model_part=sam_model.mask_decoder
+# Set up model part for finetuning
+if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+    logging.debug(f"Setting image encoder as finetuning model part...")
+    model_part=sam_model.image_encoder
 optimizer = torch.optim.AdamW(model_part.parameters(), lr=cfg['TRAIN']['LEARNING_RATE'], weight_decay=cfg['TRAIN']['WEIGHT_DECAY'])
 
 # Load pretrained checkpoint
@@ -168,7 +173,7 @@ val_dataset = SegmentationDataset(cfg['DATASET']['VAL_IMAGES'], cfg['DATASET']['
 train_loader = DataLoader(train_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=True, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
 val_loader = DataLoader(val_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=False, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
 #val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
-print(f"train_loader: {len(train_loader)}")
+logging.debug(f"train_loader: {len(train_loader)}")
 ###################################
 
     
@@ -184,8 +189,10 @@ for param in sam_model.prompt_encoder.parameters():
 for param in sam_model.mask_decoder.parameters():
     param.requires_grad = cfg['SAM']['FINETUNE']['MASK_DECODER']
     
-#for name, param in model_part.named_parameters():
-#    print(name, param.requires_grad)
+for name, param in model_part.named_parameters():
+    logging.debug(f"{name} {param.requires_grad}")
+    break
+
 #############
 
 logging.info("TRAINING phase")
@@ -197,25 +204,48 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     #with tqdm(train_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as train_bar:
     for images, masks, points, labels in train_loader:
         images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
-        #print(f"images:{images.shape}\nmasks:{masks.shape}\nbox:{box.shape}")
-        with torch.no_grad():
+        
+        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+            # If finetuning image encoder all other parts must be hot
             image_embedding = sam_model.image_encoder(images)
+        else:
+            with torch.no_grad():
+                image_embedding = sam_model.image_encoder(images)
         
-        with torch.no_grad():
+        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
             sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
-                points=(points, labels),
-                #labels=labels,
-                boxes=None,
-                masks=None,
-            )
+                    points=(points, labels),
+                    boxes=None,
+                    masks=None,
+                )
+        else:
+            with torch.no_grad():
+                sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
+                    points=(points, labels),
+                    boxes=None,
+                    masks=None,
+                )
+        if cfg['SAM']['FINETUNE']['MASK_DECODER'] or cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+            low_res_masks, iou_predictions = sam_model.mask_decoder(
+                image_embeddings=image_embedding,
+                image_pe=sam_model.prompt_encoder.get_dense_pe(),
+                sparse_prompt_embeddings=sparse_embeddings,
+                dense_prompt_embeddings=dense_embeddings,
+                multimask_output=False,
+                )
+        else:
+            with torch.no_grad():
+                low_res_masks, iou_predictions = sam_model.mask_decoder(
+                image_embeddings=image_embedding,
+                image_pe=sam_model.prompt_encoder.get_dense_pe(),
+                sparse_prompt_embeddings=sparse_embeddings,
+                dense_prompt_embeddings=dense_embeddings,
+                multimask_output=False,
+                )
         
-        low_res_masks, iou_predictions = sam_model.mask_decoder(
-            image_embeddings=image_embedding,
-            image_pe=sam_model.prompt_encoder.get_dense_pe(),
-            sparse_prompt_embeddings=sparse_embeddings,
-            dense_prompt_embeddings=dense_embeddings,
-            multimask_output=False,
-            )
+        logging.debug(f"[Image embedding] requires_grad: {image_embedding.requires_grad}")
+        logging.debug(f"[Sparse embeddings] requires_grad: {sparse_embeddings.requires_grad}")
+        logging.debug(f"[Low res masks] requires_grad: {low_res_masks.requires_grad}")
         
         upscaled_masks = sam_model.postprocess_masks(low_res_masks, target_size, target_size).to(device)
         preds = torch.sigmoid(upscaled_masks).to(device)
@@ -227,7 +257,7 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
         train_loss_epoch.append(loss_value.item())
         
         loss_batch = loss_value.item()
-            #train_bar.set_postfix(loss=f"{loss_batch:.4f}")
+        #train_bar.set_postfix(loss=f"{loss_batch:.4f}")
 
     train_loss_avg = mean(train_loss_epoch)
     
