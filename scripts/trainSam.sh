@@ -3,10 +3,12 @@
 #PBS -N SAMPolypSegmentation
 #PBS -q gpu
 #PBS -l select=1:ncpus=10:mem=64gb:scratch_local=200gb:ngpus=1:gpu_mem=24gb
-#PBS -l walltime=6:00:00
+#PBS -l walltime=12:00:00
 #PBS -j oe
 #PBS -o $PBS_O_WORKDIR/logs/output.log
 #PBS -e $PBS_O_WORKDIR/logs/error.log
+
+CFG=$CFG
 
 # Load necessary modules (adjust according to your cluster environment)
 module load singularity
@@ -38,9 +40,9 @@ pip3 install -r requirements.txt
 # Run the Python training script
 echo "Run SAM finetuning..." > $OUTPUT_LOG
 if command -v python3 &> /dev/null; then
-    python3 finetune_sam.py --cfg ./sam/configs/merged_newest_meta.yaml > $OUTPUT_LOG 2> $ERROR_LOG
+    python3 finetune_sam.py --cfg ./sam/configs/$CFG > $OUTPUT_LOG 2> $ERROR_LOG
 else
-    python finetune_sam.py --cfg ./sam/configs/merged_newest_meta.yaml > $OUTPUT_LOG 2> $ERROR_LOG
+    python finetune_sam.py --cfg ./sam/configs/$CFG > $OUTPUT_LOG 2> $ERROR_LOG
 fi
 
 EOF

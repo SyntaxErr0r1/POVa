@@ -121,8 +121,25 @@ logging.info(f"Using device: {device}...")
 
 ###################################
 ## Load SAM model
+    
 logging.info(f"Loading SAM checkpoint: {cfg['SAM']['CHECKPOINT']}...")
-sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']](checkpoint=cfg['SAM']['CHECKPOINT'])
+# Load original SAM checkpoint
+if cfg['SAM']['ORIG']:
+    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']](checkpoint=cfg['SAM']['CHECKPOINT'])
+    
+# Set up model part for finetuning
+if cfg['SAM']['FINETUNE']['MASK_DECODER']:
+    model_part=sam_model.mask_decoder
+optimizer = torch.optim.AdamW(model_part.parameters(), lr=cfg['TRAIN']['LEARNING_RATE'], weight_decay=cfg['TRAIN']['WEIGHT_DECAY'])
+
+# Load pretrained checkpoint
+if not cfg['SAM']['ORIG']:
+    checkpoint = torch.load(cfg['SAM']['CHECKPOINT'], map_location=device)
+    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']]()
+    sam_model.load_state_dict(checkpoint['model_state_dict'])
+    if 'optimizer_state_dict' in checkpoint:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    
 sam_model.to(device)
 
 logging.info("Finetuning setup")
@@ -154,10 +171,7 @@ val_loader = DataLoader(val_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuf
 print(f"train_loader: {len(train_loader)}")
 ###################################
 
-if cfg['SAM']['FINETUNE']['MASK_DECODER']:
-    model_part=sam_model.mask_decoder
     
-optimizer = torch.optim.AdamW(model_part.parameters(), lr=cfg['TRAIN']['LEARNING_RATE'], weight_decay=cfg['TRAIN']['WEIGHT_DECAY'])
 loss = DiceLoss()
 metric = IoU()
 
