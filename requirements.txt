@@ -8,3 +8,5 @@ rich
 pathlib
 tqdm
 opencv-python
+scikit-image 
+tensorboard

@@ -2,7 +2,8 @@
 !/datasets/
 .history/*
 /env22/*
-__pycache/*
-/models/*
+__pycache__/*
+models/*
+runs/*
+outputs/*
 sam/checkpoints/*
-/outputs/*
