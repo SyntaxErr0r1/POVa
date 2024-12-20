@@ -1,0 +1,27 @@
+DATASET:
+  TRAIN_IMAGES: "./datasets/Merged_newest/train_sam/images"
+  TRAIN_MASKS: "./datasets/Merged_newest/train_sam/labels"
+  VAL_IMAGES: "./datasets/Merged_newest/val/images"
+  VAL_MASKS: "./datasets/Merged_newest/val/labels"
+
+SAM:
+  CHECKPOINT: "./sam/checkpoints/sam_vit_b_01ec64.pth"
+  CHECKPOINT_TYPE: "vit_b" # [vit_b, vit_l, vit_h] Adjust checkpoint path above
+  ORIG: True
+  FINETUNE:
+    IMAGE_ENCODER:
+      ENABLED: False
+      LEARNING_RATE: 0.0
+      WEIGHT_DECAY: 0.0
+    PROMPT_ENCODER:
+      ENABLED: False
+    MASK_DECODER:
+      ENABLED: True
+      LEARNING_RATE: 0.000001
+      WEIGHT_DECAY: 0.0001
+
+TRAIN:
+  BATCH_SIZE: 8
+  EPOCHS: 100
+  IMAGE_SIZE: 1024
+  NUM_WORKERS: 4 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers

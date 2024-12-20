@@ -46,7 +46,7 @@ def main():
                 image_mask = Image.open(os.path.join(args.data, "labels", image_path))
                 # augment mask too for these augmentations
                 if augment.__name__ in ["motion_blur", "pixelate", "zoom_blur", "elastic_transform", "horizontal_flip", "vertical_flip"]:
-                    mask_array = np.array(image_mask)
+                    mask_array = np.array(image_mask.convert("L"))
                     mask_array = (mask_array > 127).astype(np.uint8) * 255  # Convert to 0 and 255
                     if mask_array.ndim == 3:
                         mask_array = mask_array[:, :, 0]
