@@ -7,7 +7,7 @@ from segmentation_models_pytorch.utils.metrics import IoU, Fscore, Accuracy, Pre
 from tqdm import tqdm
 
 
-def load_model(model_path):
+def load_Unet(model_path):
     # --------- UNet -------------------------------
     from segmentation_models_pytorch import Unet
     model = Unet(encoder_name="resnet34", encoder_weights=None, in_channels=3, classes=1)
@@ -19,7 +19,18 @@ def load_model(model_path):
     
     return model
 
-def evaluate_model(model, dataloader):
+def load_SAM(model_path):
+    pass
+
+def infer_Unet(model, images):
+    predictions = model(images)
+    predictions = torch.sigmoid(predictions) > 0.5
+    return predictions
+
+def infer_SAM(model, images):
+    pass
+
+def evaluate_model(arch, model, dataloader):
     model.eval()
     device = next(model.parameters()).device
 
@@ -43,8 +54,10 @@ def evaluate_model(model, dataloader):
             images = images.to(device)
             labels = labels.to(device)
 
-            predictions = model(images)
-            predictions = torch.sigmoid(predictions) > 0.5
+            if arch == "Unet":
+                predictions = infer_Unet()
+            elif arch == "SAM":
+                predictions = infer_SAM()
 
             # Accumulate scores for all metrics
             total_fscore += fscore_metric(predictions, labels).item()
@@ -71,6 +84,7 @@ def evaluate_model(model, dataloader):
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a binary segmentation model.")
+    parser.add_argument("-arch", choices=["Unet", "SAM"], default="Unet", help="Specify the architecture of model for evaluation (default: Unet).")
     parser.add_argument("-model", required=True, help="Filepath to the segmentation model.")
     parser.add_argument("-data", required=True, help="Filepath to the evaluation dataset (images and labels directories).")
 
@@ -93,9 +107,14 @@ def main():
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False)
 
     # Load model
-    model = load_model(args.model)
-
-    score = evaluate_model(model, dataloader)
+    if args.arch == "Unet":
+        model = load_Unet(args.model)
+    elif args.arch == "SAM":
+        model = load_SAM(args.model)
+    else:
+        raise ValueError("Invalid model architecture specified.")
+    
+    score = evaluate_model(args.arch, model, dataloader)
 
     print("Evaluation Scores:")
     for metric, value in score.items():
