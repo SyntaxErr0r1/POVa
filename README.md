@@ -55,6 +55,9 @@ For merging:
 1. Run `python augment.py` with arguments
    -data path_to_dataset (must contain `images` and `labels` directories)
 
+2. Run `python augment_small.py` with arguments
+   -data path_to_dataset (must contain `images` and `labels` directories) creates smaller and randomized version of the dataset
+
 Augmented train split is available for download here: [train_augmented_small_random.zip](https://drive.google.com/file/d/1q9Q1o15nKnhKeSsZ_K2x6lEJGZm8t6I-/view?usp=drive_link)
 
 ## Deployment

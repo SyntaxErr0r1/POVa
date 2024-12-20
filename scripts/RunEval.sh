@@ -31,9 +31,9 @@ mkdir -p $PBS_O_WORKDIR/logs/$PBS_JOBID
 
 # Run the Python training script
 if command -v python3 &> /dev/null; then
-    python3 eval.py -model $MODEL_PATH -data $EVAL_DATA_DIR > $PBS_O_WORKDIR/logs/$PBS_JOBID/output.log 2> $PBS_O_WORKDIR/logs/$PBS_JOBID/error.log
+    python3 eval.py --model $MODEL_PATH --data $EVAL_DATA_DIR > $PBS_O_WORKDIR/logs/$PBS_JOBID/output.log 2> $PBS_O_WORKDIR/logs/$PBS_JOBID/error.log
 else
-    python  eval.py -model $MODEL_PATH -data $EVAL_DATA_DIR > $PBS_O_WORKDIR/logs/$PBS_JOBID/output.log 2> $PBS_O_WORKDIR/logs/$PBS_JOBID/error.log
+    python  eval.py --model $MODEL_PATH --data $EVAL_DATA_DIR > $PBS_O_WORKDIR/logs/$PBS_JOBID/output.log 2> $PBS_O_WORKDIR/logs/$PBS_JOBID/error.log
 fi
 
 EOF
