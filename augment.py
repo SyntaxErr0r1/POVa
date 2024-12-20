@@ -16,16 +16,16 @@ def main():
     if not os.path.isdir(image_dir) or not os.path.isdir(label_dir):
         raise ValueError("Evaluation dataset must contain 'images' and 'labels' directories.")
 
-    # augmentations = [motion_blur, contrast, brightness, pixelate, jpeg_compression]
+    # augmentations = [motion_blur, zoom_blur, horizontal_flip, vertical_flip, elastic_transform]
     # augmentations = [motion_blur]
     augmentations = [gaussian_noise, shot_noise, impulse_noise, speckle_noise, gaussian_blur,
                      glass_blur, defocus_blur, motion_blur, zoom_blur, fog, spatter, contrast,
                      brightness, saturate, jpeg_compression, pixelate, elastic_transform, horizontal_flip, vertical_flip]
+    severity = 5
 
     images = os.listdir(image_dir)
     images_len = len(images)
     augmented_dir = f"{args.data}_augmented"
-    severity = 5
 
     os.makedirs(os.path.join(augmented_dir, "images"), exist_ok=True)
     os.makedirs(os.path.join(augmented_dir, "labels"), exist_ok=True)
@@ -48,13 +48,16 @@ def main():
                 if augment.__name__ in ["motion_blur", "pixelate", "zoom_blur", "elastic_transform", "horizontal_flip", "vertical_flip"]:
                     mask_array = np.array(image_mask.convert("L"))
                     mask_array = (mask_array > 127).astype(np.uint8) * 255  # Convert to 0 and 255
-                    #print(mask_array.shape)
+                    if mask_array.ndim == 3:
+                        mask_array = mask_array[:, :, 0]
                     mask_pil = Image.fromarray(mask_array, mode="L")
                     augmented_mask_pil = augment(mask_pil, severity=severity)  # Pass mask_pil to augment
                     augmented_mask_array = np.array(augmented_mask_pil)
 
+                    # print(augmented_mask_array.ndim)
                     if augmented_mask_array.ndim == 3:
                         augmented_mask_array = augmented_mask_array[:, :, 0]
+                    # print(augmented_mask_array.ndim)
 
                     binary_augmented_mask = (augmented_mask_array > 127).astype(np.uint8) * 255  # Re-binarize
                     augmented_mask_pil = Image.fromarray(binary_augmented_mask, mode="L")
