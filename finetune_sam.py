@@ -20,151 +20,96 @@ from sam.segment_anything_ori import SamPredictor, SamAutomaticMaskGenerator, sa
 
 ## Dataset imports
 from seg_dataset_sam import SegmentationDataset
-###################################
 
-##
-# Set up logging
+## Libs imports
+from libs.save_checkpoint import *
+from libs.plot_results import *
+
+###################################
+## Set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(message)s',
     datefmt="%H:%M:%S",
     handlers=[RichHandler()]
 )
 logging.getLogger("rich")
 
-##
-# Save model checkpoint
-# @param model: Model to save
-# @param optimizer: Optimizer state
-# @param epoch: Epoch number
-def save_checkpoint(model, optimizer, epoch):
-    cptPath = Path(args.cfg)
-    cptName = "SAM_"+cptPath.stem+"_e"+str(epoch)+".pth"
-    logging.info("Saving checkpoint: {cptName}")
-    
-    cptDir = Path("models")
-    cptDir.mkdir(parents=True, exist_ok=True)
-    
-    checkpoint = {
-        'epoch': epoch,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict()
-    }
-    torch.save(checkpoint, cptDir/cptName)
-
-def plot_results(sam_model, val_loader, epoch):
-    images, masks, points, labels = next(iter(val_loader))  # Get a random batch
-    images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
-    
-    with torch.no_grad():
-        image_embedding = sam_model.image_encoder(images)
-        sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
-            points=(points, labels),
-            #labels=labels,
-            boxes=None,
-            masks=None,
-        )
-        low_res_masks, iou_predictions = sam_model.mask_decoder(
-            image_embeddings=image_embedding,
-            image_pe=sam_model.prompt_encoder.get_dense_pe(),
-            sparse_prompt_embeddings=sparse_embeddings,
-            dense_prompt_embeddings=dense_embeddings,
-            multimask_output=False,
-        )
-    
-    upscaled_masks = sam_model.postprocess_masks(low_res_masks, target_size, target_size).to(device)
-    preds = torch.sigmoid(upscaled_masks).float()
-
-    batch_size = images.size(0)
-    rows = batch_size
-    cols = 3
-
-    fig, axes = plt.subplots(rows, cols, figsize=(12, 4 * rows))
-
-    for idx in range(batch_size):
-        image = images[idx].cpu().detach().permute(1, 2, 0).numpy() * 0.5 + 0.5
-        image = np.clip(image, 0, 1)
-        
-        mask = masks[idx].cpu().detach().numpy().squeeze()
-        pred_mask = (preds[idx].cpu().detach().numpy().squeeze() > 0.5).astype(np.uint8)
-
-        axes[idx, 0].imshow(image)
-        axes[idx, 0].set_title("Input Image")
-        axes[idx, 0].axis("off")
-
-        axes[idx, 1].imshow(mask, cmap="gray")
-        axes[idx, 1].set_title("Ground Truth Mask")
-        axes[idx, 1].axis("off")
-
-        axes[idx, 2].imshow(pred_mask, cmap="gray")
-        axes[idx, 2].set_title("Predicted Mask")
-        axes[idx, 2].axis("off")
-
-    plt.tight_layout()
-    plt.savefig(f"results_batch_e{epoch+1}.png")
- 
 ###################################
 ## Parse the arguments
 parser = argparse.ArgumentParser(description="Script for finetuning SAM using LoRA.")
 parser.add_argument("--cfg", required=True, type=str, help="Path to configuration file.")
 args = parser.parse_args()
-###################################
 
+###################################
 ## Load the config file
 logging.info("Loading configuration file...")
 with open(args.cfg, "r") as ymlfile:
    cfg = yaml.load(ymlfile, Loader=yaml.Loader)
 
+logging.info("LOGGING INFO")
+logging.info(f"Configuration file: {args.cfg}")
+logging.info("Finetuning setup")
+logging.info(f"\tImage encoder:  \t{cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']}")
+logging.info(f"\t\tLearning rate: {cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['LEARNING_RATE']}")
+logging.info(f"\t\tWeight decay:  {cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['WEIGHT_DECAY']}")
+logging.info(f"\tPrompt encoder: \t{cfg['SAM']['FINETUNE']['PROMPT_ENCODER']['ENABLED']}")
+logging.info(f"\tMask decoder:   \t{cfg['SAM']['FINETUNE']['MASK_DECODER']['ENABLED']}")
+logging.info(f"\t\tLearning rate: {cfg['SAM']['FINETUNE']['MASK_DECODER']['LEARNING_RATE']}")
+logging.info(f"\t\tWeight decay:  {cfg['SAM']['FINETUNE']['MASK_DECODER']['WEIGHT_DECAY']}")
+logging.info("")
+logging.info(f"Dataset")
+logging.info(f"\tTRAIN: {cfg['DATASET']['TRAIN_IMAGES']}")
+logging.info(f"\tVAL:   {cfg['DATASET']['VAL_IMAGES']}")
+logging.info("")
+###################################
 ## Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info(f"Using device: {device}...")
 
 ###################################
-## Load SAM model
-    
-logging.info(f"Loading SAM checkpoint: {cfg['SAM']['CHECKPOINT']}...")
-# Load original SAM checkpoint
-if cfg['SAM']['ORIG']:
-    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']](checkpoint=cfg['SAM']['CHECKPOINT'])
-    
-# Set up model part for finetuning
-if cfg['SAM']['FINETUNE']['MASK_DECODER']:
-    logging.debug(f"Setting mask decoder as finetuning model part...")
-    model_part=sam_model.mask_decoder
-# Set up model part for finetuning
-if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
-    logging.debug(f"Setting image encoder as finetuning model part...")
-    model_part=sam_model.image_encoder
-optimizer = torch.optim.AdamW(model_part.parameters(), lr=cfg['TRAIN']['LEARNING_RATE'], weight_decay=cfg['TRAIN']['WEIGHT_DECAY'])
+## Load SAM checkpoint
 
-# Load pretrained checkpoint
-if not cfg['SAM']['ORIG']:
-    checkpoint = torch.load(cfg['SAM']['CHECKPOINT'], map_location=device)
-    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']]()
-    sam_model.load_state_dict(checkpoint['model_state_dict'])
-    if 'optimizer_state_dict' in checkpoint:
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+logging.info(f"Loading SAM checkpoint: {cfg['SAM']['CHECKPOINT']}...")
+
+# ------ Load original SAM checkpoint
+if cfg['SAM']['ORIG']:
+    optimizer_config = []
+    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']](checkpoint=cfg['SAM']['CHECKPOINT'])
+
+    ## MASK DECODER finetuning
+    if cfg['SAM']['FINETUNE']['MASK_DECODER']['ENABLED']:
+        logging.debug(f"Setting mask decoder as finetuning model part...")
+        optimizer_config.append({'params': sam_model.mask_decoder.parameters(), "lr": cfg['SAM']['FINETUNE']['MASK_DECODER']['LEARNING_RATE'], "weight_decay": cfg['SAM']['FINETUNE']['MASK_DECODER']['WEIGHT_DECAY']})
+
+    ## IMAGE ENCODER finetuning
+    if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']:
+        logging.debug(f"Setting image encoder as finetuning model part...")
+        optimizer_config.append({'params': sam_model.image_encoder.parameters(), "lr": cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['LEARNING_RATE'], "weight_decay": cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['WEIGHT_DECAY']})
     
+    optimizer = torch.optim.AdamW(optimizer_config)
+
+# ------ Continue learning from previous checkpoint
+# Load pretrained checkpoint
+#if not cfg['SAM']['ORIG']:
+#    checkpoint = torch.load(cfg['SAM']['CHECKPOINT'], map_location=device)
+#    sam_model = sam_model_registry[cfg['SAM']['CHECKPOINT_TYPE']]()
+#    sam_model.load_state_dict(checkpoint['model_state_dict'])
+#    if 'optimizer_state_dict' in checkpoint:
+#        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    
+
+## Set model to device
 sam_model.to(device)
 
-logging.info("Finetuning setup")
-logging.info(f"\tImage encoder:  \t{cfg['SAM']['FINETUNE']['IMAGE_ENCODER']}")
-logging.info(f"\tPrompt encoder: \t{cfg['SAM']['FINETUNE']['PROMPT_ENCODER']}")
-logging.info(f"\tMask decoder:   \t{cfg['SAM']['FINETUNE']['MASK_DECODER']}")
-logging.info("")
-logging.info("Finetuning params")
-logging.info(f"\tLearning rate:  \t{cfg['TRAIN']['LEARNING_RATE']}")
-logging.info(f"\tWeight decay:   \t{cfg['TRAIN']['WEIGHT_DECAY']}")
-logging.info("")
 ###################################
-
-# Dataset
+## Dataset initialization
 logging.info(f"Initializing dataset...")
 transform = Compose([
     ToTensor(),
     Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 ])
-#mp.set_start_method('spawn', force=True)
+
 target_size = (cfg['TRAIN']['IMAGE_SIZE'], cfg['TRAIN']['IMAGE_SIZE'])
 persistent_workers = True if cfg['TRAIN']['NUM_WORKERS'] > 0 else False
 
@@ -172,28 +117,26 @@ train_dataset = SegmentationDataset(cfg['DATASET']['TRAIN_IMAGES'], cfg['DATASET
 val_dataset = SegmentationDataset(cfg['DATASET']['VAL_IMAGES'], cfg['DATASET']['VAL_MASKS'], transform=transform, target_size=target_size, sam=sam_model)
 train_loader = DataLoader(train_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=True, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
 val_loader = DataLoader(val_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=False, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
-#val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
+
 logging.debug(f"train_loader: {len(train_loader)}")
 ###################################
-
-    
+## Training params setup
 loss = DiceLoss()
 metric = IoU()
 
-#############
-# DEBUG
+###################################
+# For each part of the model, set requires_grad to True or False
 for param in sam_model.image_encoder.parameters():
-    param.requires_grad = cfg['SAM']['FINETUNE']['IMAGE_ENCODER']
+    param.requires_grad = cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']
 for param in sam_model.prompt_encoder.parameters():
-    param.requires_grad = cfg['SAM']['FINETUNE']['PROMPT_ENCODER']
+    param.requires_grad = cfg['SAM']['FINETUNE']['PROMPT_ENCODER']['ENABLED']
 for param in sam_model.mask_decoder.parameters():
-    param.requires_grad = cfg['SAM']['FINETUNE']['MASK_DECODER']
+    param.requires_grad = cfg['SAM']['FINETUNE']['MASK_DECODER']['ENABLED']
     
-for name, param in model_part.named_parameters():
-    logging.debug(f"{name} {param.requires_grad}")
-    break
-
-#############
+#for name, param in model_part.named_parameters():
+#    logging.debug(f"{name} {param.requires_grad}")
+#    break
+###################################
 
 logging.info("TRAINING phase")
 for epoch in range(cfg['TRAIN']['EPOCHS']):
@@ -201,18 +144,20 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     train_loss_epoch = []
     loss_batch = 0
     
+    # ------------------ Training ------------------
     #with tqdm(train_loader, desc=f"Epoch {epoch + 1}/{cfg['TRAIN']['EPOCHS']}", unit="batch") as train_bar:
     for images, masks, points, labels in train_loader:
+        
         images, masks, points, labels = images.to(device), masks.to(device), points.to(device), labels.to(device)
         
-        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']:
             # If finetuning image encoder all other parts must be hot
             image_embedding = sam_model.image_encoder(images)
         else:
             with torch.no_grad():
                 image_embedding = sam_model.image_encoder(images)
         
-        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+        if cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']:
             sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
                     points=(points, labels),
                     boxes=None,
@@ -225,7 +170,7 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
                     boxes=None,
                     masks=None,
                 )
-        if cfg['SAM']['FINETUNE']['MASK_DECODER'] or cfg['SAM']['FINETUNE']['IMAGE_ENCODER']:
+        if cfg['SAM']['FINETUNE']['MASK_DECODER']['ENABLED'] or cfg['SAM']['FINETUNE']['IMAGE_ENCODER']['ENABLED']:
             low_res_masks, iou_predictions = sam_model.mask_decoder(
                 image_embeddings=image_embedding,
                 image_pe=sam_model.prompt_encoder.get_dense_pe(),
@@ -261,7 +206,7 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
 
     train_loss_avg = mean(train_loss_epoch)
     
-    # Validation
+    # ------------------ Validation ------------------
     sam_model.eval()
     val_loss_epoch = []
     val_iou_epoch = []
@@ -272,7 +217,6 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
                 image_embedding = sam_model.image_encoder(images)
                 sparse_embeddings, dense_embeddings = sam_model.prompt_encoder(
                     points=(points, labels),
-                    #labels=labels,
                     boxes=None,
                     masks=None,
                 )
@@ -293,12 +237,12 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
 
     val_loss_avg = mean(val_loss_epoch)
     val_iou_avg = mean(val_iou_epoch)
-    plot_results(sam_model, val_loader, epoch)
+    plot_results(sam_model, val_loader, epoch, device, target_size)
     logging.info(f"\tEpoch [{epoch+1}/{cfg['TRAIN']['EPOCHS']}] Train Loss: {train_loss_avg:.4f} | Val loss: {val_loss_avg:.4f} | IoU: {val_iou_avg:.4f}")
    
    
     if (epoch+1) % 5 == 0:
-        save_checkpoint(sam_model, optimizer, epoch+1)
+        save_checkpoint(args, sam_model, optimizer, epoch+1)
 
 # Save model checkpoint
-save_checkpoint(sam_model, optimizer, cfg['TRAIN']['EPOCHS'])
+save_checkpoint(args, sam_model, optimizer, cfg['TRAIN']['EPOCHS'])

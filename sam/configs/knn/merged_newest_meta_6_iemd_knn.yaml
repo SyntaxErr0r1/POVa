@@ -9,14 +9,19 @@ SAM:
   CHECKPOINT_TYPE: "vit_b" # [vit_b, vit_l, vit_h] Adjust checkpoint path above
   ORIG: True
   FINETUNE:
-    IMAGE_ENCODER: True
-    PROMPT_ENCODER: False
-    MASK_DECODER: False
+    IMAGE_ENCODER:
+      ENABLED: True
+      LEARNING_RATE: 0.00001
+      WEIGHT_DECAY: 0.001
+    PROMPT_ENCODER:
+      ENABLED: False
+    MASK_DECODER:
+      ENABLED: True
+      LEARNING_RATE: 0.00001
+      WEIGHT_DECAY: 0.001
 
 TRAIN:
   BATCH_SIZE: 1
   EPOCHS: 100
-  LEARNING_RATE: 0.00001
-  WEIGHT_DECAY: 0.001
   IMAGE_SIZE: 1024
   NUM_WORKERS: 4 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers

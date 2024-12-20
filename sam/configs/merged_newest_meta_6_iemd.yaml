@@ -16,12 +16,12 @@ SAM:
     PROMPT_ENCODER:
       ENABLED: False
     MASK_DECODER:
-      ENABLED: False
-      LEARNING_RATE: 0.0
-      WEIGHT_DECAY: 0.0
+      ENABLED: True
+      LEARNING_RATE: 0.00001
+      WEIGHT_DECAY: 0.001
 
 TRAIN:
   BATCH_SIZE: 4
   EPOCHS: 100
   IMAGE_SIZE: 1024
-  NUM_WORKERS: 10 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers
+  NUM_WORKERS: 4 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers

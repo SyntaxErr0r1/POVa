@@ -1,6 +1,6 @@
 DATASET:
-  TRAIN_IMAGES: "./datasets/Merged_newest/train/images"
-  TRAIN_MASKS: "./datasets/Merged_newest/train/labels"
+  TRAIN_IMAGES: "./datasets/Merged_newest/train_augmented_small_random/images"
+  TRAIN_MASKS: "./datasets/Merged_newest/train_augmented_small_random/labels"
   VAL_IMAGES: "./datasets/Merged_newest/val/images"
   VAL_MASKS: "./datasets/Merged_newest/val/labels"
 
@@ -10,18 +10,18 @@ SAM:
   ORIG: True
   FINETUNE:
     IMAGE_ENCODER:
-      ENABLED: True
-      LEARNING_RATE: 0.00001
-      WEIGHT_DECAY: 0.001
-    PROMPT_ENCODER:
-      ENABLED: False
-    MASK_DECODER:
       ENABLED: False
       LEARNING_RATE: 0.0
       WEIGHT_DECAY: 0.0
+    PROMPT_ENCODER:
+      ENABLED: False
+    MASK_DECODER:
+      ENABLED: True
+      LEARNING_RATE: 0.00001
+      WEIGHT_DECAY: 0.001
 
 TRAIN:
-  BATCH_SIZE: 4
+  BATCH_SIZE: 8
   EPOCHS: 100
   IMAGE_SIZE: 1024
-  NUM_WORKERS: 10 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers
+  NUM_WORKERS: 4 # 0 - Multiprocessing not enabled; [1-10] Number of dataloader workers
