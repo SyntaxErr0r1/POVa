@@ -113,8 +113,8 @@ transform = Compose([
 target_size = (cfg['TRAIN']['IMAGE_SIZE'], cfg['TRAIN']['IMAGE_SIZE'])
 persistent_workers = True if cfg['TRAIN']['NUM_WORKERS'] > 0 else False
 
-train_dataset = SegmentationDataset(cfg['DATASET']['TRAIN_IMAGES'], cfg['DATASET']['TRAIN_MASKS'], transform=transform, target_size=target_size, sam=sam_model)
-val_dataset = SegmentationDataset(cfg['DATASET']['VAL_IMAGES'], cfg['DATASET']['VAL_MASKS'], transform=transform, target_size=target_size, sam=sam_model)
+train_dataset = SegmentationDataset(cfg['DATASET']['TRAIN_IMAGES'], cfg['DATASET']['TRAIN_MASKS'], transform=transform, target_size=target_size, sam=sam_model, step=cfg['TRAIN']['DUMMY_STEP'])
+val_dataset = SegmentationDataset(cfg['DATASET']['VAL_IMAGES'], cfg['DATASET']['VAL_MASKS'], transform=transform, target_size=target_size, sam=sam_model, step=cfg['TRAIN']['DUMMY_STEP'])
 train_loader = DataLoader(train_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=True, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
 val_loader = DataLoader(val_dataset, batch_size=cfg['TRAIN']['BATCH_SIZE'], shuffle=False, num_workers=cfg['TRAIN']['NUM_WORKERS'], persistent_workers=persistent_workers)
 
@@ -137,7 +137,7 @@ for param in sam_model.mask_decoder.parameters():
 #    logging.debug(f"{name} {param.requires_grad}")
 #    break
 ###################################
-
+iou_last=0.0
 logging.info("TRAINING phase")
 for epoch in range(cfg['TRAIN']['EPOCHS']):
     sam_model.train()
@@ -240,9 +240,10 @@ for epoch in range(cfg['TRAIN']['EPOCHS']):
     plot_results(sam_model, val_loader, epoch, device, target_size)
     logging.info(f"\tEpoch [{epoch+1}/{cfg['TRAIN']['EPOCHS']}] Train Loss: {train_loss_avg:.4f} | Val loss: {val_loss_avg:.4f} | IoU: {val_iou_avg:.4f}")
    
-   
-    if (epoch+1) % 5 == 0:
-        save_checkpoint(args, sam_model, optimizer, epoch+1)
+   # Save model checkpoint with better IoU
+    if iou_last < val_iou_avg:
+        iou_last = val_iou_avg
+        save_checkpoint(args, sam_model, optimizer, epoch+1, iou_last)
 
 # Save model checkpoint
 save_checkpoint(args, sam_model, optimizer, cfg['TRAIN']['EPOCHS'])

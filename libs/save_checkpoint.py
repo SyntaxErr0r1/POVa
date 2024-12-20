@@ -9,9 +9,10 @@ import logging
 # @param model: Model to save
 # @param optimizer: Optimizer state
 # @param epoch: Epoch number
-def save_checkpoint(args, model, optimizer, epoch):
+def save_checkpoint(args, model, optimizer, epoch, iou_last):
     cptPath = Path(args.cfg)
-    cptName = "SAM_"+cptPath.stem+"_e"+str(epoch)+".pth"
+    #cptName = "SAM_"+cptPath.stem+"_e"+str(epoch)+"_iou"+str(iou_last)+".pth"
+    cptName = f"SAM_{cptPath.stem}_e{epoch}_iou{iou_last:.4f}.pth"
     logging.info(f"Saving checkpoint: {cptName}")
     
     cptDir = Path("models")

@@ -9,18 +9,20 @@ import matplotlib.pyplot as plt
 
 # Custom Dataset
 class SegmentationDataset(torch.utils.data.Dataset):
-    def __init__(self, image_dir, mask_dir, transform=None, target_size=(256, 256), sam=False):
+    def __init__(self, image_dir, mask_dir, transform=None, target_size=(256, 256), sam=False, step=32):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.images = os.listdir(image_dir)
         self.transform = transform
         self.target_size = target_size
+        
+        # ------- SAM specific ------------
         self.sam = sam
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.dummy_prompt = self.generate_grid_points()
+        self.dummy_prompt = self.generate_grid_points(step)
         self.dummy_labels = np.ones(len(self.dummy_prompt))
 
-    def generate_grid_points(self, step=32):
+    def generate_grid_points(self, step):
         y_coords = np.arange(0, self.target_size[0], step)
         x_coords = np.arange(0, self.target_size[1], step)
         grid_points = np.array([[x, y] for y in y_coords for x in x_coords])
@@ -31,7 +33,6 @@ class SegmentationDataset(torch.utils.data.Dataset):
         mask_path = os.path.join(self.mask_dir, self.images[idx])
 
         image = Image.open(img_path).convert("RGB")
-        original_size = image.size
         if os.path.exists(mask_path):
             mask = Image.open(mask_path).convert("1")
         else:
@@ -48,7 +49,6 @@ class SegmentationDataset(torch.utils.data.Dataset):
             
         mask = torch.tensor(np.asarray(mask), dtype=torch.float32).unsqueeze(0)  # Add channel dimension
         assert mask.min() >= 0 and mask.max() <= 1, "Masks must be normalized to [0, 1]"
-
 
         if self.sam is None:
             return image, mask
