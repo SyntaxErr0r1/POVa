@@ -37,7 +37,7 @@ For merging:
 | ------------------------------- | ------------ | ----------------- | ----------- |
 | CVC-ClinicDB                    | -            | 612               | -           |
 | Kvasir-SEG                      | 880          | 120               | -           |
-| PolypGen2021_MultiCenterData_v3 | 8037         | -                 | -           |
+| PolypGen2021_MultiCenterData_v3 | 8,037        | -                 | -           |
 
 ### Merged_newest.zip stats
 
@@ -62,6 +62,7 @@ Augmented train split is available for download here: [train_augmented_small_ran
 #### SAM
 
 Download pretrained [SAM checkpoints](https://github.com/facebookresearch/segment-anything?tab=readme-ov-file#model-checkpoints)
+
 Run SAM finetuning:
 `python3 finetune_sam.py --cfg ./sam/configs/<YAML configuration file>`
 
@@ -75,12 +76,24 @@ Run SAM finetuning:
 
 ### Evaluation Results
 
-| Model | Train Dataset | Test Dataset | F1     | IoU    | Description |
-| ----- | ------------- | ------------ | ------ | ------ | ----------- |
-| UNet  | Standard      | Kvasir-SEG   | 0.8252 | 0.7461 | 4 epochs    |
-| UNet  | Standard      | CVC-ClinicDB | 0.7611 | 0.6822 | 4 epochs    |
-| UNet  | Standard      | Kvasir-SEG   | 0.8264 | 0.7477 | 10 epochs   |
-| UNet  | Standard      | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs   |
+| Model     | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| --------- | ------------- | ------------ | ------ | ------ | ----------- |
+| UNet      | Standard      | Kvasir-SEG   | 0.8252 | 0.7461 | 4 epochs    |
+| UNet      | Standard      | CVC-ClinicDB | 0.7611 | 0.6822 | 4 epochs    |
+| UNet      | Standard      | Kvasir-SEG   | 0.8264 | 0.7477 | 10 epochs   |
+| UNet      | Standard      | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs   |
+| SAM(md)   | Standard      | Kvasir-SEG   |        |        |             |
+| SAM(md)   | Standard      | CVC-ClinicDB |        |        |             |
+| SAM(ie)   | Standard      | Kvasir-SEG   |        |        |             |
+| SAM(ie)   | Standard      | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | Standard      | Kvasir-SEG   |        |        |             |
+| SAM(iemd) | Standard      | CVC-ClinicDB |        |        |             |
+| SAM(md)   | Augmented     | Kvasir-SEG   |        |        |             |
+| SAM(md)   | Augmented     | CVC-ClinicDB |        |        |             |
+| SAM(ie)   | Augmented     | Kvasir-SEG   |        |        |             |
+| SAM(ie)   | Augmented     | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | Augmented     | Kvasir-SEG   |        |        |             |
+| SAM(iemd) | Augmented     | CVC-ClinicDB |        |        |             |
 
 ## References
 
