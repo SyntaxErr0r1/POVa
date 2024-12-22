@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#PBS -N PolypSegmentationUnet
+#PBS -N PolypSegmentationUNet
 #PBS -q gpu
-#PBS -l select=1:ncpus=2:mem=64gb:scratch_local=200gb:ngpus=1
-#PBS -l walltime=6:00:00
+#PBS -l select=1:ncpus=1:mem=32gb:scratch_local=32gb:ngpus=1
+#PBS -l walltime=24:00:00
 #PBS -j oe
 
 # Load necessary modules (adjust according to your cluster environment)

@@ -69,7 +69,7 @@ def accumulate_scores(predictions, labels):
     total_scores["num_batches"]     += 1
 
 def infer_Unet(model, dataloader, device):
-    for images, masks in tqdm(dataloader):
+    for images, masks, *_ in tqdm(dataloader):
         images = images.to(device)
         masks = masks.to(device)
 

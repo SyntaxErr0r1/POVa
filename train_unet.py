@@ -47,7 +47,7 @@ val_clinic_loader = get_dataloader("datasets/merged/val_clinic", batch_size=8, s
 #todo: more epochs
 model_params = {
     "model": "Unet",
-    "encoder": "resnet34",
+    "encoder": "efficientnet-b5",
     "encoder_weights": "imagenet",
     "activation": None,
     "classes": 1,
