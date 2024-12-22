@@ -8,6 +8,9 @@
 #PBS -o $PBS_O_WORKDIR/logs/output.log
 #PBS -e $PBS_O_WORKDIR/logs/error.log
 
+##
+# Run: qsub -v CFG=<path to YAML config file> ./scripts/trainSam.sh
+
 CFG=$CFG
 
 # Load necessary modules (adjust according to your cluster environment)

@@ -19,13 +19,13 @@ Install required packages:
 
 Download merged dataset:
 
-1. Prepaired merged dataset is available for download here: https://drive.google.com/file/d/1tSpQWfRs7Qqi37wb6D5Dep6mbB2TT_Da/view?usp=drive_link
+1. Prepaired merged dataset is available for download here: [Merged_newest.zip](https://drive.google.com/file/d/19frkLsWn46HJgc64ti7FWDLZoXbDune5/view?usp=drive_link)
 2. Unzip dataset into `./datasets/merged` folder
 
-For merging:
+Merge using `dataset_merge.py` script:
 
 1. Create a 'datasets' folder
-2. Download CVC-ClinicDB, Kvasir-SEG and PolypGen2021_MultiCenterData_v3 datasets into this folder, link: [Merged_newest.zip](https://drive.google.com/file/d/19frkLsWn46HJgc64ti7FWDLZoXbDune5/view?usp=drive_link)
+2. Download CVC-ClinicDB, Kvasir-SEG and PolypGen2021_MultiCenterData_v3 datasets into this folder, link: [Datasets](https://drive.google.com/drive/folders/1TE8Di181fkII9du4kxLZe7V6_ZjY3o20?usp=drive_link)
 3. Unzip datasets into this folder
 4. Run `python ./datasets/dataset_merge.py`
 
@@ -79,24 +79,65 @@ Run SAM finetuning:
 
 ### Evaluation Results
 
-| Model     | Train Dataset | Test Dataset | F1     | IoU    | Description |
-| --------- | ------------- | ------------ | ------ | ------ | ----------- |
-| UNet      | Standard      | Kvasir-SEG   | 0.8252 | 0.7461 | 4 epochs    |
-| UNet      | Standard      | CVC-ClinicDB | 0.7611 | 0.6822 | 4 epochs    |
-| UNet      | Standard      | Kvasir-SEG   | 0.8264 | 0.7477 | 10 epochs   |
-| UNet      | Standard      | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs   |
-| SAM(md)   | Standard      | Kvasir-SEG   |        |        |             |
-| SAM(md)   | Standard      | CVC-ClinicDB |        |        |             |
-| SAM(ie)   | Standard      | Kvasir-SEG   |        |        |             |
-| SAM(ie)   | Standard      | CVC-ClinicDB |        |        |             |
-| SAM(iemd) | Standard      | Kvasir-SEG   |        |        |             |
-| SAM(iemd) | Standard      | CVC-ClinicDB |        |        |             |
-| SAM(md)   | Augmented     | Kvasir-SEG   |        |        |             |
-| SAM(md)   | Augmented     | CVC-ClinicDB |        |        |             |
-| SAM(ie)   | Augmented     | Kvasir-SEG   |        |        |             |
-| SAM(ie)   | Augmented     | CVC-ClinicDB |        |        |             |
-| SAM(iemd) | Augmented     | Kvasir-SEG   |        |        |             |
-| SAM(iemd) | Augmented     | CVC-ClinicDB |        |        |             |
+Checkpoints are available for download here: [Checkpoints](https://drive.google.com/drive/folders/1oSuGKIIHufZv7Mifya1xgN3rmqlcPPwl?usp=drive_link)
+
+<!-- table -->
+
+| Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| ----- | ---------- | ------------- | ------------ | ------ | ------ | ----------- |
+| UNet  |            | Standard      | Kvasir-SEG   | 0.8252 | 0.7461 | 4 epochs    |
+| UNet  |            | Standard      | CVC-ClinicDB | 0.7611 | 0.6822 | 4 epochs    |
+| UNet  |            | Standard      | Kvasir-SEG   | 0.8264 | 0.7477 | 10 epochs   |
+| UNet  |            | Standard      | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs   |
+
+#### Segment Anything Finetuning Results
+
+Finetunind decoder only experiments results:
+
+<!-- table -->
+
+| Model   | Checkpoint                                            | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| ------- | ----------------------------------------------------- | ------------- | ------------ | ------ | ------ | ----------- |
+| SAM(md) | SAM_f_merged_newest_meta_7_md_e69_iou0.5655.pth       | Standard      | Kvasir-SEG   | 0.7422 | 0.6481 | 69 epochs   |
+| SAM(md) |                                                       | Standard      | CVC-ClinicDB | 0.6869 | 0.6014 |             |
+| SAM(md) | SAM_f_sam_merged_newest_meta_7_md_e97_iou0.5541.pth   | Standard SAM  | Kvasir-SEG   | 0.7757 | 0.6896 | 97 epochs   |
+| SAM(md) |                                                       | Standard SAM  | CVC-ClinicDB | 0.6661 | 0.5859 |             |
+| SAM(md) | SAM_f_merged_newest_A_meta_7_md_e11_iou0.5464.pth     | Augmented     | Kvasir-SEG   | 0.7444 | 0.6530 | 11 epochs   |
+| SAM(md) |                                                       | Augmented     | CVC-ClinicDB | 0.6720 | 0.5896 |             |
+| SAM(md) | SAM_f_sam_merged_newest_A_meta_7_md_e31_iou0.5566.pth | Augmented SAM | Kvasir-SEG   | 0.7687 | 0.6851 | 31 epochs   |
+| SAM(md) |                                                       | Augmented SAM | CVC-ClinicDB | 0.6528 | 0.5766 |             |
+
+Finetuning encoders only experiments results:
+
+<!-- table -->
+
+| Model   | Checkpoint                                            | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| ------- | ----------------------------------------------------- | ------------- | ------------ | ------ | ------ | ----------- |
+| SAM(ie) | SAM_f_merged_newest_meta_7_ie_e34_iou0.7617.pth       | Standard      | Kvasir-SEG   | 0.8787 | 0.8102 | 34 epochs   |
+| SAM(ie) |                                                       | Standard      | CVC-ClinicDB | 0.8386 | 0.7685 |             |
+| SAM(ie) | SAM_f_sam_merged_newest_meta_7_ie_e29_iou0.7794.pth   | Standard SAM  | Kvasir-SEG   | 0.8807 | 0.8147 | 29 epochs   |
+| SAM(ie) |                                                       | Standard SAM  | CVC-ClinicDB | 0.8590 | 0.7896 |             |
+| SAM(ie) | SAM_f_merged_newest_A_meta_7_ie_e6_iou0.7474.pth      | Augmented     | Kvasir-SEG   | 0.8597 | 0.7843 | 6 epochs    |
+| SAM(ie) |                                                       | Augmented     | CVC-ClinicDB | 0.8431 | 0.7650 |             |
+| SAM(ie) | SAM_f_sam_merged_newest_A_meta_7_ie_e18_iou0.7855.pth | Augmented SAM | Kvasir-SEG   | 0.8837 | 0.8166 | 18 epochs   |
+| SAM(ie) |                                                       | Augmented SAM | CVC-ClinicDB | 0.8659 | 0.7975 |             |
+
+Finetuning encoders and decoder experiments results:
+
+<!-- table -->
+
+| Model     | Checkpoint                                              | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| --------- | ------------------------------------------------------- | ------------- | ------------ | ------ | ------ | ----------- |
+| SAM(iemd) | SAM_f_merged_newest_meta_7_iemd_e32_iou0.7528.pt        | Standard      | Kvasir-SEG   |        |        |             |
+| SAM(iemd) |                                                         | Standard      | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | SAM_f_sam_merged_newest_meta_7_iemd_e52_iou0.7848.pth   | Standard SAM  | Kvasir-SEG   | 0.8801 | 0.8178 | 52 epochs   |
+| SAM(iemd) |                                                         | Standard SAM  | CVC-ClinicDB | 0.8541 | 0.7886 |             |
+| SAM(iemd) | SAM_merged_newest_A_meta_7_iemd_e11_iou0.7632.pth       | Augmented     | Kvasir-SEG   |        |        |             |
+| SAM(iemd) |                                                         | Augmented     | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | SAM_f_sam_merged_newest_A_meta_7_iemd_e34_iou0.7976.pth | Augmented SAM | Kvasir-SEG   | 0.8831 | 0.8189 | 34 epochs   |
+| SAM(iemd) |                                                         | Augmented SAM | CVC-ClinicDB | 0.8714 | 0.8058 |             |
+
+_Note: SAM datasets versions do noc contain images without polyps_
 
 ## References
 

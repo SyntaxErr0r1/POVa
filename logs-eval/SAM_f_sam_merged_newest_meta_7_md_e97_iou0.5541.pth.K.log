@@ -1,0 +1,13 @@
+07:14:04 INFO     Evaluation Parameters:                                              eval.py:143
+         INFO     Architecture:     SAM                                               eval.py:144
+         INFO     Evaluating model:                                                   eval.py:145
+                  ./models/final/SAM_f_sam_merged_newest_meta_7_md_e97_iou0.5541.pth             
+         INFO     Evaluation data:  ./datasets/Merged_newest/val_kvasir               eval.py:146
+07:14:15 INFO     Model loaded successfully...                                        eval.py:163
+         INFO     Starting evaluation...                                              eval.py:165
+Evaluation Scores:
+  Fscore: 0.7757
+  Accuracy: 0.9325
+  Precision: 0.8099
+  Recall: 0.8230
+  IoU: 0.6896

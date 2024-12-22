@@ -2,16 +2,18 @@
 
 #PBS -N SAMPolypSegmentation
 #PBS -q gpu
-#PBS -l select=1:ncpus=10:mem=64gb:scratch_local=200gb:ngpus=1:gpu_mem=50gb
+#PBS -l select=1:ncpus=10:mem=64gb:scratch_local=200gb:ngpus=1
 #PBS -l walltime=12:00:00
 #PBS -j oe
 #PBS -o $PBS_O_WORKDIR/logs/output.log
 #PBS -e $PBS_O_WORKDIR/logs/error.log
 
 ##
-# Run: qsub -v CFG=<path to YAML config file> ./scripts/trainSamIE.sh
+# Run: qsub -v CPT=<.pth file in [./models/final/]> ./scripts/evalSam.sh
 
-CFG=$CFG
+CPT=./models/final/$CPT
+EVAL_DIR_KVASIR=./datasets/Merged_newest/val_kvasir
+EVAL_DIR_CLINIC=./datasets/Merged_newest/val_clinic
 
 # Load necessary modules (adjust according to your cluster environment)
 module load singularity
@@ -23,7 +25,7 @@ cd $PBS_O_WORKDIR
 SCRATCH_DIR=$SCRATCHDIR
 mkdir -p $SCRATCH_DIR
 
-LOG_DIR=$PBS_O_WORKDIR/logs/$PBS_JOBID
+LOG_DIR=$PBS_O_WORKDIR/logs-eval/$PBS_JOBID
 mkdir -p $LOG_DIR
 
 # Logs
@@ -43,9 +45,11 @@ pip3 install -r requirements.txt
 # Run the Python training script
 echo "Run SAM finetuning..." > $OUTPUT_LOG
 if command -v python3 &> /dev/null; then
-    python3 finetune_sam.py --cfg ./sam/configs/$CFG > $OUTPUT_LOG 2> $ERROR_LOG
+    python3 eval.py --arch SAM --model $CPT --data $EVAL_DIR_KVASIR > $OUTPUT_LOG 2> $ERROR_LOG
+    python3 eval.py --arch SAM --model $CPT --data $EVAL_DIR_CLINIC > $OUTPUT_LOG 2> $ERROR_LOG
 else
-    python finetune_sam.py --cfg ./sam/configs/$CFG > $OUTPUT_LOG 2> $ERROR_LOG
+    python eval.py --arch SAM --model $CPT --data $EVAL_DIR_KVASIR > $OUTPUT_LOG 2> $ERROR_LOG
+    python eval.py --arch SAM --model $CPT --data $EVAL_DIR_CLINIC > $OUTPUT_LOG 2> $ERROR_LOG
 fi
 
 EOF

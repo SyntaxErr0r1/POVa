@@ -36,7 +36,8 @@ total_scores = {
     "num_batches": 0.0
 }
 
-device = torch.device("cpu")
+#device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_Unet(model_path):
     # --------- UNet -------------------------------
