@@ -134,8 +134,8 @@ Finetuning encoders and decoder experiments results:
 | SAM(iemd) |                                                                                                                                                  | Standard      | CVC-ClinicDB | 0.8206 | 0.7527 |             |
 | SAM(iemd) | [SAM_f_sam_merged_newest_meta_7_iemd_e52_iou0.7848.pth](https://drive.google.com/file/d/1b6_VULKrvRkLOHWvVXCldgIYkWuJGnYt/view?usp=drive_link)   | Standard SAM  | Kvasir-SEG   | 0.8801 | 0.8178 | 52 epochs   |
 | SAM(iemd) |                                                                                                                                                  | Standard SAM  | CVC-ClinicDB | 0.8541 | 0.7886 |             |
-| SAM(iemd) | [SAM_merged_newest_A_meta_7_iemd_e11_iou0.7632.pth](https://drive.google.com/file/d/1HnMYQobFkQnpMJrbQHTSCGCsQZWtTAb7/view?usp=drive_link)       | Augmented     | Kvasir-SEG   |        |        |             |
-| SAM(iemd) |                                                                                                                                                  | Augmented     | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | [SAM_merged_newest_A_meta_7_iemd_e11_iou0.7632.pth](https://drive.google.com/file/d/1HnMYQobFkQnpMJrbQHTSCGCsQZWtTAb7/view?usp=drive_link)       | Augmented     | Kvasir-SEG   | 0.8846 | 0.8196 | 11 epochs   |
+| SAM(iemd) |                                                                                                                                                  | Augmented     | CVC-ClinicDB | 0.8437 | 0.7736 |             |
 | SAM(iemd) | [SAM_f_sam_merged_newest_A_meta_7_iemd_e34_iou0.7976.pth](https://drive.google.com/file/d/1E3xzZkFpo8MEHnc5Ta59lhy3zkosa3TL/view?usp=drive_link) | Augmented SAM | Kvasir-SEG   | 0.8831 | 0.8189 | 34 epochs   |
 | SAM(iemd) |                                                                                                                                                  | Augmented SAM | CVC-ClinicDB | 0.8714 | 0.8058 |             |
 
