@@ -1,0 +1,11 @@
+10:07:23 INFO     Evaluation Parameters:          eval.py:143
+         INFO     Architecture:     SAM           eval.py:144
+         INFO     Evaluating model:               eval.py:145
+                  ./models/final/SAM_merged_newes            
+                  t_A_meta_7_iemd_e11_iou0.7632.p            
+                  th                                         
+         INFO     Evaluation data:                eval.py:146
+                  ./datasets/Merged_newest/val_kv            
+                  asir                                       
+10:07:42 INFO     Model loaded successfully...    eval.py:163
+         INFO     Starting evaluation...          eval.py:165

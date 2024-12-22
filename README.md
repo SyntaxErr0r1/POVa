@@ -81,6 +81,8 @@ Run SAM finetuning:
 
 Checkpoints are available for download here: [Checkpoints](https://drive.google.com/drive/folders/1oSuGKIIHufZv7Mifya1xgN3rmqlcPPwl?usp=drive_link)
 
+#### UNet Finetuning Results
+
 <!-- table -->
 
 | Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
@@ -128,8 +130,8 @@ Finetuning encoders and decoder experiments results:
 
 | Model     | Checkpoint                                              | Train Dataset | Test Dataset | F1     | IoU    | Description |
 | --------- | ------------------------------------------------------- | ------------- | ------------ | ------ | ------ | ----------- |
-| SAM(iemd) | SAM_f_merged_newest_meta_7_iemd_e32_iou0.7528.pt        | Standard      | Kvasir-SEG   |        |        |             |
-| SAM(iemd) |                                                         | Standard      | CVC-ClinicDB |        |        |             |
+| SAM(iemd) | SAM_f_merged_newest_meta_7_iemd_e32_iou0.7528.pt        | Standard      | Kvasir-SEG   | 0.8803 | 0.8172 | 32 epochs   |
+| SAM(iemd) |                                                         | Standard      | CVC-ClinicDB | 0.8206 | 0.7527 |             |
 | SAM(iemd) | SAM_f_sam_merged_newest_meta_7_iemd_e52_iou0.7848.pth   | Standard SAM  | Kvasir-SEG   | 0.8801 | 0.8178 | 52 epochs   |
 | SAM(iemd) |                                                         | Standard SAM  | CVC-ClinicDB | 0.8541 | 0.7886 |             |
 | SAM(iemd) | SAM_merged_newest_A_meta_7_iemd_e11_iou0.7632.pth       | Augmented     | Kvasir-SEG   |        |        |             |
@@ -137,7 +139,7 @@ Finetuning encoders and decoder experiments results:
 | SAM(iemd) | SAM_f_sam_merged_newest_A_meta_7_iemd_e34_iou0.7976.pth | Augmented SAM | Kvasir-SEG   | 0.8831 | 0.8189 | 34 epochs   |
 | SAM(iemd) |                                                         | Augmented SAM | CVC-ClinicDB | 0.8714 | 0.8058 |             |
 
-_Note: SAM datasets versions do noc contain images without polyps_
+_Note: SAM datasets versions do not contain images without polyps._
 
 ## References
 
