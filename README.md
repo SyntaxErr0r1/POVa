@@ -194,6 +194,37 @@ Finetuning encoders and decoder experiments results:
 
 _Note: SAM datasets versions do not contain images without polyps._
 
+
+kvasir
+Evaluation Scores:
+  Fscore: 0.8879
+  IoU: 0.8294
+
+clinic
+Evaluation Scores:
+  Fscore: 0.8643
+  IoU: 0.7988
+
+standard scse
+
+kvasir
+  Fscore: 0.8784
+  IoU: 0.8179
+
+clinic
+Evaluation Scores:
+  Fscore: 0.8460
+  IoU: 0.7783
+
+## UNet (with scSE attention) + EfficientNet-b5 experiment 
+| Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| ----- | ---------- | ------------- | ------------ | ------ | ------ | ----------- |
+| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_standard_12-23_02-41)](https://drive.google.com/file/d/11IKcwPnYRhdTQafzYxrekmqewsZNoC3r/view?usp=drive_link)       | Standard     | Kvasir-SEG   | 0.8784 | 0.8179 |   |
+| UNet[scSE] + EfficientNet-b5  |            | Standard     | CVC-ClinicDB | 0.8460 | 0.7783 |    |
+| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_augmented_12-23_13-51)](https://drive.google.com/file/d/16Psc45lOQu5lOroc-erNYI7xhR5_Ets0/view?usp=drive_link)       | Augmented     | Kvasir-SEG   | 0.8879 | 0.8294 |    |
+| UNet[scSE] + EfficientNet-b5  |            | Augmented     | CVC-ClinicDB | 0.8643 | 0.7988 |    |
+
+
 ## References
 
 1. [Segment anything Model](https://github.com/facebookresearch/segment-anything?tab=readme-ov-file#segment-anything)

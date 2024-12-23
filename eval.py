@@ -42,7 +42,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def load_Unet(model_path):
     # --------- UNet -------------------------------
     from segmentation_models_pytorch import Unet
-    model = Unet(encoder_name="resnet34", encoder_weights=None, in_channels=3, classes=1)
+    model = Unet(encoder_name="efficientnet-b5", encoder_weights=None, in_channels=3, classes=1, decoder_attention_type="scse")
     model.load_state_dict(torch.load(model_path, map_location=device))
     
     #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

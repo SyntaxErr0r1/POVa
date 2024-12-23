@@ -3,7 +3,16 @@ Script for selecting sample images from the validation set and visualizing the g
 
 Works with both UNet and SAM models.
 """
+import sys
+import os
 
+# Get the parent directory
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Add the parent directory to sys.path
+sys.path.insert(0, parent_dir)
+
+# Now you can import the file from the parent directory
 import eval
 
 import os
@@ -54,6 +63,10 @@ def main():
     if args.arch == "Unet":
         dataset = SegmentationDataset(image_dir=image_dir, mask_dir=label_dir, transform=transform, sam=False)
         model = eval.load_Unet(args.model)
+
+        print(model)    
+
+        exit()
     elif args.arch == "SAM":
         #TODO: Implement SAM model loading
         dataset = SegmentationDataset(image_dir=image_dir, mask_dir=label_dir, transform=transform, sam=True)
