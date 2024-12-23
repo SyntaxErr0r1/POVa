@@ -89,13 +89,12 @@ Checkpoints are available for download here: [Checkpoints](https://drive.google.
 | UNet  |            | Standard      | Kvasir-SEG   | 0.8264 | 0.7477 | 10 epochs   |
 | UNet  |            | Standard      | CVC_ClinicDB | 0.7254 | 0.6498 | 10 epochs   | -->
 
-| Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
-| ----- | ---------- | ------------- | ------------ | ------ | ------ | ----------- |
-| UNet + Resnet34  |     [UNet+Resnet34+Standard (unet_segmentation_12-19_08-36).pth](https://drive.google.com/file/d/1RRK7I18bC0OcvOCE67Co_LH6KjDrpla7/view?usp=drive_link)       | Standard     | Kvasir-SEG   | 0.8564 | 0.7873 | 39 epochs   |
-| UNet + Resnet34  |            | Standard     | CVC-ClinicDB | 0.7856 | 0.7134 | 39 epochs   |
-| UNet + Resnet34  |     [UNet+Resnet34+Augmented (unet_segmentation_12-21_11-21)](https://drive.google.com/file/d/15GFF-NmsA6rHIh4FtqoqRmiuSWnzGOmE/view?usp=drive_link)       | Augmented     | Kvasir-SEG   | 0.8466 | 0.7729 | 41 epochs   |
-| UNet + Resnet34  |            | Augmented     | CVC-ClinicDB | 0.8060 | 0.7307 | 41 epochs   |
-
+| Model           | Checkpoint                                                                                                                                          | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------ | ------ | ------ | ----------- |
+| UNet + Resnet34 | [UNet+Resnet34+Standard (unet_segmentation_12-19_08-36).pth](https://drive.google.com/file/d/1RRK7I18bC0OcvOCE67Co_LH6KjDrpla7/view?usp=drive_link) | Standard      | Kvasir-SEG   | 0.8564 | 0.7873 | 39 epochs   |
+| UNet + Resnet34 |                                                                                                                                                     | Standard      | CVC-ClinicDB | 0.7856 | 0.7134 | 39 epochs   |
+| UNet + Resnet34 | [UNet+Resnet34+Augmented (unet_segmentation_12-21_11-21)](https://drive.google.com/file/d/15GFF-NmsA6rHIh4FtqoqRmiuSWnzGOmE/view?usp=drive_link)    | Augmented     | Kvasir-SEG   | 0.8466 | 0.7729 | 41 epochs   |
+| UNet + Resnet34 |                                                                                                                                                     | Augmented     | CVC-ClinicDB | 0.8060 | 0.7307 | 41 epochs   |
 
 <!-- non aug
 Starting Epoch 41 [2024-12-19 08:26:54]
@@ -119,7 +118,7 @@ Evaluation Scores:
   Accuracy: 0.0000
   Precision: 0.8863
   Recall: 0.8035
-  IoU: 0.7134 
+  IoU: 0.7134
 
 <!-- aug -->
 <!-- Starting Epoch 39 [2024-12-21 10:54:35]
@@ -127,7 +126,7 @@ Training Loss: 0.1007
 Validation Loss (Kvasir): 0.1604, IoU: 0.7304 F1: 0.8395
 Validation Loss (Clinic): 0.1761, IoU: 0.7101 F1: 0.8239
 Epoch 39 took 00:26:57
-Model saved to models/unet_segmentation_12-21_11-21.pth 
+Model saved to models/unet_segmentation_12-21_11-21.pth
 
 Kvasir
 Evaluation Scores:
@@ -193,6 +192,11 @@ Finetuning encoders and decoder experiments results:
 | SAM(iemd) |                                                                                                                                                  | Augmented SAM | CVC-ClinicDB | 0.8714 | 0.8058 |             |
 
 _Note: SAM datasets versions do not contain images without polyps._
+
+##### Generate outputs
+
+To generate outputs run:
+`python3 ./utils/generate_images.py --sam_model ./models/final/SAM_f_sam_merged_newest_A_meta_7_iemd_e34_iou0.7976.pth --unet_model ./models/final/'UNet+Resnet34+Standard (unet_segmentation_12-19_08-36).pth' --data ./datasets/Merged_newest/val_kvasir --batch_size 8`
 
 ## References
 

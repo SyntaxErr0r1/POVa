@@ -123,7 +123,7 @@ def load_SAM(model_path):
     return model
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate a binary segmentation model.")
+    parser = argparse.ArgumentParser(description="Generate outputs from Unet and SAM models.")
     parser.add_argument("--unet_model", required=True, help="Filepath to the Unet segmentation model.")
     parser.add_argument("--sam_model", required=True, help="Filepath to the SAM segmentation model.")
     parser.add_argument("--data", required=True, help="Filepath to the evaluation dataset (images and labels directories).")
