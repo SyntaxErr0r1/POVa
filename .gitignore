@@ -7,3 +7,4 @@ models/*
 runs/*
 outputs/*
 sam/checkpoints/*
+figures/*
