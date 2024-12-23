@@ -82,28 +82,25 @@ def main():
         mask = mask.squeeze().numpy()
         pred_mask = pred_mask.squeeze().numpy()
 
-        # Plot images
-        plt.figure(figsize=(15, 5))
-        plt.subplot(1, 3, 1)
-        plt.imshow(image)
-        plt.title("Image")
-        plt.axis("off")
+        dataset_last_dirname = os.path.basename(os.path.normpath(args.data))
 
-        plt.subplot(1, 3, 2)
-        plt.imshow(mask, cmap="gray")
-        plt.title("Ground Truth Mask")
-        plt.axis("off")
-
-        plt.subplot(1, 3, 3)
-        plt.imshow(pred_mask, cmap="gray")
-        plt.title("Predicted Mask")
-        plt.axis("off")
-
-        # plt.show()
-
-        # save image
-        plt.savefig(f"figures/{args.name}_{i}.png")
+        name_prefix = f"{dataset_last_dirname}_{i+1}"
         
+        subdir = f"{args.arch}_{args.name}"
+
+        if not os.path.exists(f"figures/{subdir}"):
+            os.makedirs(f"figures/{subdir}")
+
+        # save the original image
+        plt.imsave(f"figures/{subdir}/{name_prefix}_image.png", image)
+
+        # save the ground truth mask
+        plt.imsave(f"figures/{subdir}/{name_prefix}_mask.png", mask, cmap="gray")
+
+        # save the predicted mask
+        plt.imsave(f"figures/{subdir}/{name_prefix}_pred_mask.png", pred_mask, cmap="gray")
+
+        logging.info(f"Saved images for {name_prefix} in figures directory.")
 
 if __name__ == "__main__":
     ###################################
