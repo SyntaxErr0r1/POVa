@@ -97,53 +97,13 @@ Checkpoints are available for download here: [Checkpoints](https://drive.google.
 | UNet + Resnet34  |            | Augmented     | CVC-ClinicDB | 0.8060 | 0.7307 | 41 epochs   |
 
 
-<!-- non aug
-Starting Epoch 41 [2024-12-19 08:26:54]
-Training Loss: 0.0985
-Validation Loss (Kvasir): 0.1591, IoU: 0.7319 F1: 0.8409
-Validation Loss (Clinic): 0.1780, IoU: 0.7084 F1: 0.8221
-Epoch 41 took 00:09:32
-Model saved to models/unet_segmentation_12-19_08-36.pth
-
-Kvasir
-Evaluation Scores:
-  Fscore: 0.8564
-  Accuracy: 0.0000
-  Precision: 0.8674
-  Recall: 0.9049
-  IoU: 0.7873
-
-Clinic
-Evaluation Scores:
-  Fscore: 0.7856
-  Accuracy: 0.0000
-  Precision: 0.8863
-  Recall: 0.8035
-  IoU: 0.7134 
-
-<!-- aug -->
-<!-- Starting Epoch 39 [2024-12-21 10:54:35]
-Training Loss: 0.1007
-Validation Loss (Kvasir): 0.1604, IoU: 0.7304 F1: 0.8395
-Validation Loss (Clinic): 0.1761, IoU: 0.7101 F1: 0.8239
-Epoch 39 took 00:26:57
-Model saved to models/unet_segmentation_12-21_11-21.pth 
-
-Kvasir
-Evaluation Scores:
-  Fscore: 0.8466
-  Accuracy: 0.0000
-  Precision: 0.8967
-  Recall: 0.8627
-  IoU: 0.7729
-
-Clinic
-Evaluation Scores:
-  Fscore: 0.8060
-  Accuracy: 0.0000
-  Precision: 0.9040
-  Recall: 0.8081
-  IoU: 0.7307 -->
+#### UNet training (with scSE attention) + EfficientNet-b5 Experiment Results
+| Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
+| ----- | ---------- | ------------- | ------------ | ------ | ------ | ----------- |
+| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_standard_12-23_02-41)](https://drive.google.com/file/d/11IKcwPnYRhdTQafzYxrekmqewsZNoC3r/view?usp=drive_link)       | Standard     | Kvasir-SEG   | 0.8784 | 0.8179 |   |
+| UNet[scSE] + EfficientNet-b5  |            | Standard     | CVC-ClinicDB | 0.8460 | 0.7783 |    |
+| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_augmented_12-23_13-51)](https://drive.google.com/file/d/16Psc45lOQu5lOroc-erNYI7xhR5_Ets0/view?usp=drive_link)       | Augmented     | Kvasir-SEG   | 0.8879 | 0.8294 |    |
+| UNet[scSE] + EfficientNet-b5  |            | Augmented     | CVC-ClinicDB | 0.8643 | 0.7988 |    |
 
 #### Segment Anything Finetuning Results
 
@@ -195,7 +155,7 @@ Finetuning encoders and decoder experiments results:
 _Note: SAM datasets versions do not contain images without polyps._
 
 
-kvasir
+<!-- kvasir
 Evaluation Scores:
   Fscore: 0.8879
   IoU: 0.8294
@@ -214,15 +174,9 @@ kvasir
 clinic
 Evaluation Scores:
   Fscore: 0.8460
-  IoU: 0.7783
+  IoU: 0.7783 -->
 
-## UNet (with scSE attention) + EfficientNet-b5 experiment 
-| Model | Checkpoint | Train Dataset | Test Dataset | F1     | IoU    | Description |
-| ----- | ---------- | ------------- | ------------ | ------ | ------ | ----------- |
-| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_standard_12-23_02-41)](https://drive.google.com/file/d/11IKcwPnYRhdTQafzYxrekmqewsZNoC3r/view?usp=drive_link)       | Standard     | Kvasir-SEG   | 0.8784 | 0.8179 |   |
-| UNet[scSE] + EfficientNet-b5  |            | Standard     | CVC-ClinicDB | 0.8460 | 0.7783 |    |
-| UNet[scSE] + EfficientNet-b5  |     [UNet+EfficientNet-b5-scse (unet_scse_augmented_12-23_13-51)](https://drive.google.com/file/d/16Psc45lOQu5lOroc-erNYI7xhR5_Ets0/view?usp=drive_link)       | Augmented     | Kvasir-SEG   | 0.8879 | 0.8294 |    |
-| UNet[scSE] + EfficientNet-b5  |            | Augmented     | CVC-ClinicDB | 0.8643 | 0.7988 |    |
+
 
 
 ## References
