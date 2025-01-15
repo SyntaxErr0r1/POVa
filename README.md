@@ -203,3 +203,8 @@ To generate outputs run:
 1. [Segment anything Model](https://github.com/facebookresearch/segment-anything?tab=readme-ov-file#segment-anything)
 2. [How To Fine-Tune The Segment Anything Model](https://encord.com/blog/learn-how-to-fine-tune-the-segment-anything-model-sam/)
 3. [Segmentation Models Pytorch](https://github.com/qubvel-org/segmentation_models.pytorch)
+
+## Acknowledgement
+
+Computational resources were provided by the e-INFRA CZ project (ID:90254),
+supported by the Ministry of Education, Youth and Sports of the Czech Republic.
